@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikacja Redukcja ☁️</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Aplikacja Fitness 🌟</title>
     <style>
         :root {
             --primary: #4a90e2;
@@ -12,6 +11,7 @@
             --text: #2c3e50;
             --bg: #f4f7f9;
             --card-bg: #ffffff;
+            --accent: #2ecc71;
         }
 
         body {
@@ -23,7 +23,6 @@
             margin: 0 auto;
         }
 
-        /* PASEK NAWIGACJI TOP */
         .top-nav {
             display: flex;
             justify-content: space-around;
@@ -38,8 +37,8 @@
             text-decoration: none;
             color: #7a8b99;
             font-weight: 700;
-            font-size: 0.9rem;
-            padding: 8px 12px;
+            font-size: 0.85rem;
+            padding: 8px 10px;
             border-radius: 10px;
             transition: all 0.2s ease;
         }
@@ -49,7 +48,6 @@
             background: var(--primary-light);
         }
 
-        /* KARTY */
         .card {
             background: var(--card-bg);
             padding: 20px;
@@ -61,184 +59,185 @@
         h2 {
             font-size: 1.1rem;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             color: var(--text);
         }
 
-        /* KALORIE */
         .progress-bar-bg {
-            background: #edf2f7;
-            height: 12px;
-            border-radius: 6px;
+            background: #e1e8ed;
+            height: 16px;
+            border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 15px;
+            margin: 12px 0;
         }
 
         .progress-bar-fill {
             background: var(--primary);
             height: 100%;
             width: 0%;
-            transition: width 0.3s ease;
+            border-radius: 10px;
+            transition: width 0.4s ease, background-color 0.4s ease;
         }
 
-        .calorie-progress {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .stat-box .num {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        input {
+        input[type="number"] {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #e1e8ed;
-            border-radius: 12px;
+            border-radius: 10px;
             box-sizing: border-box;
             margin-bottom: 10px;
-            font-size: 0.95rem;
         }
 
-        .btn {
+        .btn-main {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             background: var(--primary);
             color: white;
-            font-weight: 700;
+            font-weight: 800;
+            font-size: 0.85rem;
             cursor: pointer;
-            margin-bottom: 8px;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: #7a8b99;
-            border: 1px solid #e1e8ed;
-        }
-
-        .btn-accent {
-            background: #4a90e2;
+        .history-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            border: 1px solid #edf2f7;
         }
     </style>
 </head>
 <body>
 
-    <!-- PASEK NAWIGACJI -->
+    <!-- NAWIGACJA -->
     <nav class="top-nav">
-    <a href="index.html" class="nav-link active">🏠 Główna</a>
-    <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
-    <a href="trening.html" class="nav-link">⏱️ Trening</a>
-    <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
-</nav>
+        <a href="index.html" class="nav-link active">🏠 Główna</a>
+        <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
+        <a href="trening.html" class="nav-link">⏱️ Trening</a>
+        <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
+    </nav>
 
-    <!-- SZYBKI DZIENNIK KALORII -->
+    <!-- CELE I PASEK POSTĘPU KALORII -->
     <div class="card">
-        <h2>☁️ Dziennik Kalorii</h2>
-        <div class="progress-bar-bg"><div class="progress-bar-fill" id="kcalBar"></div></div>
-        <div class="calorie-progress">
-            <div class="stat-box"><div>Zjedzone</div><div class="num" id="eatenKcal">0</div><div>kcal</div></div>
-            <div class="stat-box"><div>Pozostało</div><div class="num" id="leftKcal">1600</div><div>kcal</div></div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>🎯 Cel Kaloryczny</h2>
+            <button onclick="setCalorieGoal()" style="background:none; border:none; color:var(--primary); font-weight:700; cursor:pointer; font-size:0.8rem;">⚙️ Zmień cel</button>
         </div>
-        <input type="number" id="addKcalInput" placeholder="Wpisz kalorie posiłku">
-        <button class="btn" onclick="addCalories()">Dodaj Posiłek ✨</button>
-        <button class="btn btn-outline" onclick="resetCalories()">Resetuj kalorie 🔄</button> 
+
+        <div style="font-size: 1.4rem; font-weight: 800; color: #2c3e50; margin-top: 5px;">
+            <span id="currentKcalDisplay">0</span> / <span id="goalKcalDisplay">2000</span> kcal
+        </div>
+
+        <div class="progress-bar-bg">
+            <div id="kcalProgressBar" class="progress-bar-fill"></div>
+        </div>
+
+        <div style="font-size: 0.85rem; color: #7a8b99; font-weight: 600;" id="kcalStatusText">
+            Zostało: 2000 kcal
+        </div>
     </div>
 
-    <!-- POSTĘP WAGI -->
+    <!-- ŚLEDZIK WAGI I WYMIARÓW -->
     <div class="card">
-        <h2>📈 Postęp Wagi</h2>
-        <div style="display: flex; gap: 10px;">
-            <input type="number" step="0.1" id="weightInput" placeholder="Dzisiejsza waga (kg)">
-            <button class="btn btn-accent" style="width: 40%;" onclick="addWeight()">Zapisz 🩵</button>
+        <h2>📈 Waga i Wymiary</h2>
+        <div style="display: flex; gap: 8px;">
+            <input type="number" id="weightInput" step="0.1" placeholder="Waga (kg)">
+            <input type="number" id="waistInput" placeholder="Talia (cm)">
         </div>
-        <canvas id="weightChart" style="margin-top:15px;"></canvas>
+        <button class="btn-main" onclick="saveMeasurement()">💾 Zapisz pomiar</button>
+
+        <div id="measurementsHistory" style="margin-top: 15px;"></div>
     </div>
 
     <script>
-        // --- 1. KALORIE ---
-        const goalKcal = 1600;
-        let eaten = parseInt(localStorage.getItem('eatenKcal')) || 0;
+        let calorieGoal = parseInt(localStorage.getItem('userCalorieGoal')) || 2000;
+        let measurements = JSON.parse(localStorage.getItem('userMeasurementsHistory')) || [];
 
         function updateCalorieUI() {
-            document.getElementById('eatenKcal').textContent = eaten;
-            document.getElementById('leftKcal').textContent = Math.max(0, goalKcal - eaten);
-            
-            const percentage = Math.min(100, (eaten / goalKcal) * 100);
-            document.getElementById('kcalBar').style.width = percentage + '%';
-        }
+            const todayKcal = parseInt(localStorage.getItem('todayCalories')) || 0;
+            document.getElementById('currentKcalDisplay').textContent = todayKcal;
+            document.getElementById('goalKcalDisplay').textContent = calorieGoal;
 
-        function addCalories() {
-            const input = document.getElementById('addKcalInput');
-            const val = parseInt(input.value);
-            if (val) {
-                eaten += val;
-                localStorage.setItem('eatenKcal', eaten);
-                updateCalorieUI();
-                input.value = '';
+            const percent = Math.min(Math.round((todayKcal / calorieGoal) * 100), 100);
+            const bar = document.getElementById('kcalProgressBar');
+            bar.style.width = percent + '%';
+
+            const remaining = calorieGoal - todayKcal;
+            const status = document.getElementById('kcalStatusText');
+
+            if (remaining > 0) {
+                status.textContent = `Pozostało do wykorzystania: ${remaining} kcal`;
+                bar.style.backgroundColor = '#4a90e2';
+            } else if (remaining === 0) {
+                status.textContent = `Idealnie! Osiągnięto dzisiejszy cel! 🎉`;
+                bar.style.backgroundColor = '#2ecc71';
+            } else {
+                status.textContent = `Przekroczono cel o ${Math.abs(remaining)} kcal ⚡`;
+                bar.style.backgroundColor = '#e74c3c';
             }
         }
 
-        function resetCalories() {
-            if (confirm("Na pewno chcesz zresetować dzisiejsze kalorie?")) {
-                eaten = 0;
-                localStorage.setItem('eatenKcal', eaten);
-                localStorage.removeItem('todayMeals');
+        function setCalorieGoal() {
+            const newGoal = prompt("Wpisz swój dzienny cel kalorii (kcal):", calorieGoal);
+            if (newGoal && !isNaN(newGoal) && newGoal > 0) {
+                calorieGoal = parseInt(newGoal);
+                localStorage.setItem('userCalorieGoal', calorieGoal);
                 updateCalorieUI();
             }
         }
 
-        // --- 2. WAGA I WYKRES ---
-        let weightData = JSON.parse(localStorage.getItem('weightData')) || [];
-        let weightChart;
+        function saveMeasurement() {
+            const weight = document.getElementById('weightInput').value;
+            const waist = document.getElementById('waistInput').value;
 
-        function initChart() {
-            const ctx = document.getElementById('weightChart').getContext('2d');
-            weightChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weightData.map(d => d.date),
-                    datasets: [{
-                        label: 'Waga (kg)',
-                        data: weightData.map(d => d.weight),
-                        borderColor: '#4a90e2',
-                        backgroundColor: 'rgba(74, 144, 226, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: false } }
-                }
+            if (!weight && !waist) {
+                alert("Wpisz przynajmniej wagę lub obwód talii!");
+                return;
+            }
+
+            const dateStr = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+            measurements.unshift({ date: dateStr, weight: weight, waist: waist });
+            localStorage.setItem('userMeasurementsHistory', JSON.stringify(measurements));
+
+            document.getElementById('weightInput').value = '';
+            document.getElementById('waistInput').value = '';
+
+            renderMeasurements();
+        }
+
+        function renderMeasurements() {
+            const container = document.getElementById('measurementsHistory');
+            container.innerHTML = '';
+
+            if (measurements.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.8rem;">Brak zapisanych pomiarów ☁️</p>';
+                return;
+            }
+
+            measurements.forEach((m, idx) => {
+                container.innerHTML += `
+                    <div class="history-row">
+                        <strong style="color:var(--primary);">${m.date}</strong>
+                        <span>${m.weight ? '⚖️ ' + m.weight + ' kg' : ''} ${m.waist ? '📏 ' + m.waist + ' cm' : ''}</span>
+                        <button onclick="deleteMeasurement(${idx})" style="background:none; border:none; cursor:pointer;">🗑️</button>
+                    </div>
+                `;
             });
         }
 
-        function addWeight() {
-            const input = document.getElementById('weightInput');
-            const weight = parseFloat(input.value);
-            if (weight) {
-                const today = new Date().toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' });
-                weightData.push({ date: today, weight: weight });
-                localStorage.setItem('weightData', JSON.stringify(weightData));
-                
-                weightChart.data.labels = weightData.map(d => d.date);
-                weightChart.data.datasets[0].data = weightData.map(d => d.weight);
-                weightChart.update();
-                
-                input.value = '';
-            }
+        function deleteMeasurement(idx) {
+            measurements.splice(idx, 1);
+            localStorage.setItem('userMeasurementsHistory', JSON.stringify(measurements));
+            renderMeasurements();
         }
 
-        // Inicjalizacja przy starcie
         updateCalorieUI();
-        initChart();
+        renderMeasurements();
     </script>
 </body>
 </html>
