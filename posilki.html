@@ -1,10 +1,19 @@
-<!-- NAV BAR / MENU TOP -->
-<nav class="nav-link active">
-    <a href="index.html" class="nav-link">🏠 Główna</a>
-    <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
-    <a href="trening.html" class="nav-link">⏱️ Trening</a>
-</nav>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szczegółowe Posiłki 🍽️</title>
+    <link rel="stylesheet" href="style.css"> <!-- Jeśli masz osobny plik ze stylami CSS -->
+</head>
+<body style="font-family: system-ui, sans-serif; background: #f4f7f9; padding: 15px; max-width: 500px; margin: 0 auto;">
 
+    <!-- PASEK NAWIGACJI -->
+    <nav class="nav-lick active">
+        <a href="index.html" class="nav-link">🏠 Główna</a>
+        <a href="posilki.html" class="nav-link active">🍽️ Posiłki</a>
+        <a href="trening.html" class="nav-link">⏱️ Trening</a>
+    </nav>
 <style>
 .top-nav {
     display: flex;
@@ -29,3 +38,95 @@
     background: var(--primary-light, #edf4f8);
 }
 </style>
+    <!-- SZCZEGÓŁOWY DZIENNIK POSIŁKÓW -->
+    <div class="card" style="background:#fff; padding:20px; border-radius:20px; box-shadow:0 4px 15px rgba(0,0,0,0.04);">
+        <h2>🍽️ Dzisiejsze Posiłki</h2>
+        
+        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <select id="mealType" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #e1e8ed;">
+                <option value="🥣 Śniadanie">🥣 Śniadanie</option>
+                <option value="🥗 Obiad">🥗 Obiad</option>
+                <option value="🥪 Kolacja">🥪 Kolacja</option>
+                <option value="🍎 Przekąska">🍎 Przekąska</option>
+            </select>
+            <input type="number" id="mealKcalInput" placeholder="kcal" style="width: 35%; padding: 10px; border-radius: 10px; border: 1px solid #e1e8ed;">
+        </div>
+        
+        <input type="text" id="mealNameInput" placeholder="Nazwa posiłku (np. Owsianka)" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e1e8ed; box-sizing: border-box; margin-bottom: 10px;">
+        <button onclick="addFullMeal()" style="width: 100%; padding: 12px; border: none; border-radius: 12px; background: #4a90e2; color: #fff; font-weight: bold; cursor: pointer;">Dodaj Posiłek do Menu ✨</button>
+
+        <div id="mealsList" style="margin-top: 15px;"></div>
+    </div>
+
+    <script>
+        let todayMeals = JSON.parse(localStorage.getItem('todayMeals')) || [];
+
+        function renderMeals() {
+            const list = document.getElementById('mealsList');
+            if (!list) return;
+            list.innerHTML = '';
+
+            if (todayMeals.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.85rem; padding:10px;">Brak zapisanych posiłków na dziś ☁️</p>';
+                return;
+            }
+
+            todayMeals.forEach((meal, index) => {
+                list.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#fafcfe; padding:10px 14px; border-radius:12px; margin-bottom:8px; border:1px solid #edf4f8;">
+                        <div>
+                            <span style="font-size:0.75rem; font-weight:700; color:#4a90e2; background:#edf4f8; padding:2px 8px; border-radius:8px;">${meal.type}</span>
+                            <div style="font-weight:700; color:#2c3e50; margin-top:2px;">${meal.name}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-weight:800; color:#4a90e2;">${meal.kcal} kcal</span>
+                            <button onclick="removeMeal(${index})" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addFullMeal() {
+            const typeInput = document.getElementById('mealType');
+            const nameInput = document.getElementById('mealNameInput');
+            const kcalInput = document.getElementById('mealKcalInput');
+
+            if (!kcalInput || !kcalInput.value) {
+                alert("Wpisz liczbę kalorii! ☁️");
+                return;
+            }
+
+            const type = typeInput ? typeInput.value : 'Posiłek';
+            const name = (nameInput && nameInput.value) ? nameInput.value : 'Posiłek';
+            const kcal = parseInt(kcalInput.value);
+
+            todayMeals.push({ type, name, kcal });
+            localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
+            
+            // Dolicza kalorie do głównego licznika z pliku index.html!
+            let eaten = parseInt(localStorage.getItem('eatenKcal')) || 0;
+            eaten += kcal;
+            localStorage.setItem('eatenKcal', eaten);
+
+            if (nameInput) nameInput.value = '';
+            if (kcalInput) kcalInput.value = '';
+            
+            renderMeals();
+        }
+
+        function removeMeal(index) {
+            let eaten = parseInt(localStorage.getItem('eatenKcal')) || 0;
+            const removedKcal = todayMeals[index].kcal;
+            eaten = Math.max(0, eaten - removedKcal);
+            localStorage.setItem('eatenKcal', eaten);
+
+            todayMeals.splice(index, 1);
+            localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
+            renderMeals();
+        }
+
+        renderMeals();
+    </script>
+</body>
+</html>
