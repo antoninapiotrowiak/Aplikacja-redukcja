@@ -137,8 +137,10 @@
         <div class="countdown-box" id="countdown">Ładowanie odliczania...</div>
     </header>
 
-    <!-- TAB 1: DASHBOARD -->
+   <!-- TAB 1: DASHBOARD -->
     <div id="dashboard" class="tab-content active">
+        
+        <!-- SZYBKI DZIENNIK KALORII -->
         <div class="card">
             <h2>☁️ Dziennik Kalorii</h2>
             <div class="progress-bar-bg"><div class="progress-bar-fill" id="kcalBar"></div></div>
@@ -148,9 +150,32 @@
             </div>
             <input type="number" id="addKcalInput" placeholder="Wpisz kalorie posiłku">
             <button class="btn" onclick="addCalories()">Dodaj Posiłek </button>
-            <button class="btn btn-outline" onclick="resetCalories()">Resetuj kalorie </button>
+            <button class="btn btn-outline" onclick="resetCalories()">Resetuj kalorie </button> 
         </div>
 
+        <!-- SZCZEGÓŁOWY DZIENNIK POSIŁKÓW -->
+        <div class="card">
+            <h2>🍽️ Dzisiejsze Posiłki</h2>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <select id="mealType" style="flex: 1; margin: 0;">
+                    <option value="🥣 Śniadanie">🥣 Śniadanie</option>
+                    <option value="🥗 Obiad">🥗 Obiad</option>
+                    <option value="🥪 Kolacja">🥪 Kolacja</option>
+                    <option value="🍎 Przekąska">🍎 Przekąska</option>
+                </select>
+                <input type="number" id="mealKcalInput" placeholder="kcal" style="width: 35%; margin: 0;">
+            </div>
+            
+            <input type="text" id="mealNameInput" placeholder="Nazwa posiłku (np. Owsianka z borówkami)">
+            <button class="btn btn-accent" onclick="addFullMeal()" style="margin-top: 5px;">Dodaj Posiłek do Menu ✨</button>
+
+            <div id="mealsList" style="margin-top: 15px;">
+                <!-- Tu pojawią się dodane posiłki -->
+            </div>
+        </div>
+
+        <!-- POSTĘP WAGI -->
         <div class="card">
             <h2>📈 Postęp Wagi</h2>
             <div style="display: flex; gap: 10px;">
@@ -159,8 +184,8 @@
             </div>
             <canvas id="weightChart" style="margin-top:15px;"></canvas>
         </div>
-    </div>
 
+    </div>
     <!-- TAB 2: TRENINGI & TIMERY -->
     <div id="workouts" class="tab-content">
         
