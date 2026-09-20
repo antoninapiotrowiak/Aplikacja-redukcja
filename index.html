@@ -297,7 +297,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { 
             getAuth, 
-            signInWithPopup, 
+            signInWithRedirect, 
+            getRedirectResult,
             GoogleAuthProvider, 
             signOut, 
             onAuthStateChanged 
@@ -330,10 +331,15 @@
 
         let unsubscribeSnapshot = null;
 
-        // LOGOWANIE
+        // Odbiór wyniku po przekierowaniu
+        getRedirectResult(auth).catch((error) => {
+            console.error("Błąd po przekierowaniu:", error);
+        });
+
+        // LOGOWANIE BEZ POP-UPU (PRZEKIEROWANIE)
         window.zalogujZGoogle = async function() {
             try {
-                await signInWithPopup(auth, provider);
+                await signInWithRedirect(auth, provider);
             } catch (error) {
                 console.error("Błąd logowania:", error);
                 alert("Nie udało się zalogować: " + error.message);
@@ -360,7 +366,6 @@
                 authBtn.textContent = 'Wyloguj';
                 authBtn.style.background = '#e74c3c';
 
-                // Nasłuchuj tylko pomiarów zalogowanego użytkownika
                 const q = query(collection(db, "pomiary"), where("userId", "==", user.uid));
                 
                 if (unsubscribeSnapshot) unsubscribeSnapshot();
@@ -407,7 +412,7 @@
         // USUWANIE POMIARU
         window.usunPomiarZFirebase = async function(id) {
             try {
-                await deleteDoc(doc(doc(db, "pomiary", id)));
+                await deleteDoc(doc(db, "pomiary", id));
             } catch (e) {
                 console.error("Błąd usuwania:", e);
             }
