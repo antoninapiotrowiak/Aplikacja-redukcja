@@ -206,6 +206,27 @@
 
     <!-- SKRYPT INTERFEJSU I AUTOMATYZACJI -->
     <script>
+    // Sprawdzamy, czy minął nowy dzień i resetujemy znaczniki powiadomień
+function checkDayReset() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const lastActiveDay = localStorage.getItem('lastActiveDay');
+
+    if (lastActiveDay !== todayStr) {
+        // Nowy dzień! Usuwamy wczorajsze znaczniki "zrobione", żeby powiadomienia ruszyły od nowa
+        localStorage.removeItem('breakfast_' + lastActiveDay);
+        localStorage.removeItem('lunch_' + lastActiveDay);
+        localStorage.removeItem('dinner_' + lastActiveDay);
+        localStorage.removeItem('workout_' + lastActiveDay);
+        
+        // Zapisujemy dzisiejszy dzień jako ostatni aktywny
+        localStorage.setItem('lastActiveDay', todayStr);
+    }
+}
+
+// Uruchamiamy od razu przy starcie strony
+checkDayReset();
+
+
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
                 .then(reg => console.log('Service Worker zarejestrowany!'))
