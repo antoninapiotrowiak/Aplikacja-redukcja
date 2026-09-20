@@ -164,9 +164,9 @@
     <div class="card">
         <h2>🔔 Automatyczne Przypomnienia</h2>
         <p style="font-size:0.8rem; color:#7a8b99; margin-bottom:12px;">
-            Włącz automatyczne przypomnienia o posiłkach (Śniadanie od 9:00, Obiad od 15:00, Kolacja od 19:00). Będziemy przypominać co godzinę, dopóki ich nie uzupełnisz!
+            Włącz automatyczne przypomnienia (posiłki: 9:00, 15:00, 19:00 oraz trening: 16:00-20:00). Będziemy przypominać co godzinę, dopóki ich nie uzupełnisz!
         </p>
-        <button id="notifToggleBtn" class="btn-main" onclick="requestNotificationPermission()">⚡ Włącz przypomnienia o posiłkach</button>
+        <button id="notifToggleBtn" class="btn-main" onclick="requestNotificationPermission()">⚡ Włącz przypomnienia</button>
         <div id="notifStatus" style="font-size:0.8rem; color:#2ecc71; font-weight:700; display:none; margin-top:8px;">
             ✅ Automatyczne przypomnienia są aktywne!
         </div>
@@ -223,7 +223,7 @@
                 updateNotifUI();
                 checkMealReminders();
             } else if (permission === 'denied') {
-                alert('Powiadomienia zostały zablokowane w ustawieniach telefonu.');
+                alert('Powiadomienia zostały zablokowane w ustawieniach.');
             }
         }
 
@@ -236,16 +236,16 @@
             }
         }
 
-        async function sendMealNotification(title, body) {
+        async function sendMealNotification(title, body, targetUrl = '/posilki.html') {
             if (Notification.permission === 'granted' && navigator.serviceWorker.ready) {
                 const reg = await navigator.serviceWorker.ready;
                 reg.showNotification(title, {
                     body: body,
                     vibrate: [200, 100, 200],
                     requireInteraction: true,
-                    data: { url: '/posilki.html' },
+                    data: { url: targetUrl },
                     actions: [
-                        { action: 'open-posilki', title: '🍽️ Zapisz posiłek' }
+                        { action: 'open-app', title: '🚀 Otwórz aplikację' }
                     ]
                 });
             }
@@ -264,7 +264,8 @@
                 if (!isBreakfastEaten) {
                     sendMealNotification(
                         'Czas na śniadanie! 🥣', 
-                        'Nie uzupełniłaś jeszcze dzisiejszego śniadania! Wpisz co zjadłaś, aby trzymać bilans.'
+                        'Nie uzupełniłaś jeszcze dzisiejszego śniadania! Wpisz co zjadłaś, aby trzymać bilans.',
+                        '/posilki.html'
                     );
                 }
             }
@@ -275,7 +276,8 @@
                 if (!isLunchEaten) {
                     sendMealNotification(
                         'Czas na obiad! 🍲', 
-                        'Pora na obiad! Pamiętaj, aby uzupełnić kalorie w aplikacji.'
+                        'Pora na obiad! Pamiętaj, aby uzupełnić kalorie w aplikacji.',
+                        '/posilki.html'
                     );
                 }
             }
@@ -286,7 +288,20 @@
                 if (!isDinnerEaten) {
                     sendMealNotification(
                         'Czas na kolację! 🥗', 
-                        'Czy jadłaś już kolację? Zapisz swój ostatni posiłek na dziś!'
+                        'Czy jadłaś już kolację? Zapisz swój ostatni posiłek na dziś!',
+                        '/posilki.html'
+                    );
+                }
+            }
+
+            // 4. Trening (od godziny 16:00 do 20:00)
+            if (currentHour >= 16 && currentHour <= 20) {
+                const isWorkoutDone = localStorage.getItem(`workout_${todayStr}`);
+                if (!isWorkoutDone) {
+                    sendMealNotification(
+                        'Czas na trening! ⏱️', 
+                        'Hej, czas ruszyć się z miejsca! Zrób dzisiejszy trening i zaznacz go w aplikacji.',
+                        '/trening.html'
                     );
                 }
             }
@@ -511,7 +526,7 @@
 
         window.usunPomiarZFirebase = async function(id) {
             try {
-                await deleteDoc(doc(doc(db, "pomiary", id)));
+                await deleteDoc(doc(db, "pomiary", id));
             } catch (e) {
                 console.error("Błąd usuwania:", e);
             }
