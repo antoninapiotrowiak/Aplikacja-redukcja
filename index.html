@@ -129,19 +129,6 @@
             margin-bottom: 8px;
         }
 
-        .btn-secondary {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--primary);
-            border-radius: 10px;
-            background: transparent;
-            color: var(--primary);
-            font-weight: 800;
-            font-size: 0.85rem;
-            cursor: pointer;
-            margin-bottom: 8px;
-        }
-
         .history-row {
             display: flex;
             justify-content: space-between;
@@ -173,16 +160,15 @@
         <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
     </nav>
 
-    <!-- KARTA POWIADOMIEŃ PRZYPOMINAJĄCYCH -->
+    <!-- KARTA POWIADOMIEŃ AUTOMATYCZNYCH -->
     <div class="card">
-        <h2>🔔 Przypomnienia i Powiadomienia</h2>
+        <h2>🔔 Automatyczne Przypomnienia</h2>
         <p style="font-size:0.8rem; color:#7a8b99; margin-bottom:12px;">
-            Włącz interaktywne powiadomienia, aby nie zapomnieć o wpisaniu kalorii oraz o treningu!
+            Włącz automatyczne przypomnienia o posiłkach (Śniadanie od 9:00, Obiad od 15:00, Kolacja od 19:00). Będziemy przypominać co godzinę, dopóki ich nie uzupełnisz!
         </p>
-        <button class="btn-main" onclick="requestNotificationPermission()">⚡ Włącz powiadomienia</button>
-        <div style="display:flex; gap:8px;">
-            <button class="btn-secondary" onclick="testMealNotification()">🍽️ Test Posiłków</button>
-            <button class="btn-secondary" onclick="testWorkoutNotification()">⏱️ Test Treningu</button>
+        <button id="notifToggleBtn" class="btn-main" onclick="requestNotificationPermission()">⚡ Włącz przypomnienia o posiłkach</button>
+        <div id="notifStatus" style="font-size:0.8rem; color:#2ecc71; font-weight:700; display:none; margin-top:8px;">
+            ✅ Automatyczne przypomnienia są aktywne!
         </div>
     </div>
 
@@ -218,7 +204,7 @@
         <div id="measurementsHistory" style="margin-top: 15px;"></div>
     </div>
 
-    <!-- SKRYPT INTERFEJSU I POWIADOMIEŃ -->
+    <!-- SKRYPT INTERFEJSU I AUTOMATYZACJI -->
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
@@ -234,51 +220,80 @@
 
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
-                alert('Super! Powiadomienia zostały włączone 🎉');
+                updateNotifUI();
+                checkMealReminders();
             } else if (permission === 'denied') {
-                alert('Powiadomienia zostały zablokowane w ustawieniach przeglądarki.');
+                alert('Powiadomienia zostały zablokowane w ustawieniach telefonu.');
             }
         }
 
-        async function testMealNotification() {
-            if (Notification.permission !== 'granted') {
-                await requestNotificationPermission();
+        function updateNotifUI() {
+            const btn = document.getElementById('notifToggleBtn');
+            const status = document.getElementById('notifStatus');
+            if (Notification.permission === 'granted') {
+                if (btn) btn.style.display = 'none';
+                if (status) status.style.display = 'block';
             }
+        }
 
+        async function sendMealNotification(title, body) {
             if (Notification.permission === 'granted' && navigator.serviceWorker.ready) {
                 const reg = await navigator.serviceWorker.ready;
-                reg.showNotification('Czas na wpisanie posiłku! 🍽️', {
-                    body: 'Jak tam dzisiejszy bilans kalorii? Uzupełnij swoje posiłki!',
+                reg.showNotification(title, {
+                    body: body,
                     vibrate: [200, 100, 200],
                     requireInteraction: true,
                     data: { url: '/posilki.html' },
                     actions: [
-                        { action: 'open-posilki', title: '🍽️ Zapisz posiłki' },
-                        { action: 'snooze', title: '⏰ Za godzinę' }
+                        { action: 'open-posilki', title: '🍽️ Zapisz posiłek' }
                     ]
                 });
             }
         }
 
-        async function testWorkoutNotification() {
-            if (Notification.permission !== 'granted') {
-                await requestNotificationPermission();
+        function checkMealReminders() {
+            if (Notification.permission !== 'granted') return;
+
+            const now = new Date();
+            const currentHour = now.getHours();
+            const todayStr = now.toISOString().split('T')[0];
+
+            // 1. Śniadanie (od godziny 9:00 do 14:59)
+            if (currentHour >= 9 && currentHour < 15) {
+                const isBreakfastEaten = localStorage.getItem(`breakfast_${todayStr}`);
+                if (!isBreakfastEaten) {
+                    sendMealNotification(
+                        'Czas na śniadanie! 🥣', 
+                        'Nie uzupełniłaś jeszcze dzisiejszego śniadania! Wpisz co zjadłaś, aby trzymać bilans.'
+                    );
+                }
             }
 
-            if (Notification.permission === 'granted' && navigator.serviceWorker.ready) {
-                const reg = await navigator.serviceWorker.ready;
-                reg.showNotification('Czas na dzisiejszy trening! ⏱️', {
-                    body: 'Gotowa na małą aktywność? Ruszajmy po formę!',
-                    vibrate: [300, 100, 300],
-                    requireInteraction: true,
-                    data: { url: '/trening.html' },
-                    actions: [
-                        { action: 'open-trening', title: '⏱️ Rozpocznij trening' },
-                        { action: 'snooze', title: '⏰ Później' }
-                    ]
-                });
+            // 2. Obiad (od godziny 15:00 do 18:59)
+            if (currentHour >= 15 && currentHour < 19) {
+                const isLunchEaten = localStorage.getItem(`lunch_${todayStr}`);
+                if (!isLunchEaten) {
+                    sendMealNotification(
+                        'Czas na obiad! 🍲', 
+                        'Pora na obiad! Pamiętaj, aby uzupełnić kalorie w aplikacji.'
+                    );
+                }
+            }
+
+            // 3. Kolacja (od godziny 19:00 w górę)
+            if (currentHour >= 19) {
+                const isDinnerEaten = localStorage.getItem(`dinner_${todayStr}`);
+                if (!isDinnerEaten) {
+                    sendMealNotification(
+                        'Czas na kolację! 🥗', 
+                        'Czy jadłaś już kolację? Zapisz swój ostatni posiłek na dziś!'
+                    );
+                }
             }
         }
+
+        // Uruchamiaj sprawdzanie automatyczne co godzinę (3600000 ms)
+        setInterval(checkMealReminders, 3600000);
 
         let calorieGoal = parseInt(localStorage.getItem('userCalorieGoal')) || 2000;
 
@@ -379,6 +394,7 @@
         }
 
         updateCalorieUI();
+        updateNotifUI();
     </script>
 
     <!-- MODULE FIREBASE -->
@@ -495,7 +511,7 @@
 
         window.usunPomiarZFirebase = async function(id) {
             try {
-                await deleteDoc(doc(db, "pomiary", id));
+                await deleteDoc(doc(doc(db, "pomiary", id)));
             } catch (e) {
                 console.error("Błąd usuwania:", e);
             }
@@ -503,4 +519,3 @@
     </script>
 </body>
 </html>
-
