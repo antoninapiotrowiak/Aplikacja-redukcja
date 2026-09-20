@@ -663,6 +663,71 @@
             document.getElementById('fullPhase').innerText = isFullWorkPhase ? "ĆWICZ SERIĘ! 💪" : "ODPOCZYNEK ☕";
             document.getElementById('fullTime').innerText = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
+        // SYSTEM PEŁNYCH POSIŁKÓW
+        let todayMeals = JSON.parse(localStorage.getItem('todayMeals')) || [];
+
+        function renderMeals() {
+            const list = document.getElementById('mealsList');
+            if (!list) return;
+            list.innerHTML = '';
+
+            if (todayMeals.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.85rem; padding:10px;">Brak zapisanych posiłków na dziś ☁️</p>';
+                return;
+            }
+
+            todayMeals.forEach((meal, index) => {
+                list.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#fafcfe; padding:10px 14px; border-radius:12px; margin-bottom:8px; border:1px solid #edf4f8;">
+                        <div>
+                            <span style="font-size:0.75rem; font-weight:700; color:var(--primary); background:var(--primary-light); padding:2px 8px; border-radius:8px;">${meal.type}</span>
+                            <div style="font-weight:700; color:var(--text); margin-top:2px;">${meal.name}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-weight:800; color:var(--primary);">${meal.kcal} kcal</span>
+                            <button onclick="removeMeal(${index})" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addFullMeal() {
+            const type = document.getElementById('mealType').value;
+            const name = document.getElementById('mealNameInput').value || 'Posiłek';
+            const kcal = parseInt(document.getElementById('mealKcalInput').value);
+
+            if (kcal) {
+                todayMeals.push({ type, name, kcal });
+                localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
+                
+                // Jeśli masz zmienną eaten z pierwszego kalkulatora
+                if (typeof eaten !== 'undefined') {
+                    eaten += kcal;
+                    if (typeof updateCalorieUI === 'function') updateCalorieUI();
+                }
+                
+                document.getElementById('mealNameInput').value = '';
+                document.getElementById('mealKcalInput').value = '';
+                
+                renderMeals();
+            }
+        }
+
+        function removeMeal(index) {
+            if (typeof eaten !== 'undefined') {
+                const removedKcal = todayMeals[index].kcal;
+                eaten = Math.max(0, eaten - removedKcal);
+                if (typeof updateCalorieUI === 'function') updateCalorieUI();
+            }
+
+            todayMeals.splice(index, 1);
+            localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
+            renderMeals();
+        }
+
+        // Wywołanie przy załadowaniu strony
+        renderMeals();
     </script>
 </body>
 </html>
