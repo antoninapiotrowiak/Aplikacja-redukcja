@@ -4,9 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stoper i Trening ⏱️</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-light: #edf4f8;
+            --text: #2c3e50;
+            --bg: #f4f7f9;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #7a8b99;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+    </style>
 </head>
-<body style="font-family: system-ui, sans-serif; background: #f4f7f9; padding: 15px; max-width: 500px; margin: 0 auto;">
+<body>
 
     <!-- PASEK NAWIGACJI -->
     <nav class="top-nav">
@@ -15,33 +72,8 @@
         <a href="trening.html" class="nav-link active">⏱️ Trening</a>
     </nav>
 
-<style>
-.top-nav {
-    display: flex;
-    justify-content: space-around;
-    background: #ffffff;
-    padding: 12px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-}
-.nav-link {
-    text-decoration: none;
-    color: #7a8b99;
-    font-weight: 700;
-    font-size: 0.9rem;
-    padding: 8px 12px;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-.nav-link:hover, .nav-link.active {
-    color: var(--primary, #4a90e2);
-    background: var(--primary-light, #edf4f8);
-}
-</style>
-
     <!-- STOPER PRZERW I LICZNIK SERII -->
-    <div class="card" style="background:#fff; padding:20px; border-radius:20px; box-shadow:0 4px 15px rgba(0,0,0,0.04);">
+    <div class="card">
         <h2>⏱️ Stoper i Trening</h2>
         
         <div style="text-align: center; margin: 20px 0;">
@@ -66,12 +98,15 @@
         let timeLeft = 60;
         let completedSets = parseInt(localStorage.getItem('workoutSets')) || 0;
 
-        document.getElementById('setCounter').textContent = completedSets;
+        const setCounterEl = document.getElementById('setCounter');
+        if (setCounterEl) setCounterEl.textContent = completedSets;
 
         function updateDisplay() {
+            const timerEl = document.getElementById('timerDisplay');
+            if (!timerEl) return;
             const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
             const seconds = (timeLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
+            timerEl.textContent = `${minutes}:${seconds}`;
         }
 
         function startTimer(seconds) {
@@ -85,7 +120,8 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    document.getElementById('timerDisplay').textContent = "00:00";
+                    const timerEl = document.getElementById('timerDisplay');
+                    if (timerEl) timerEl.textContent = "00:00";
                     alert("Koniec przerwy! Czas na kolejną serię 💪");
                 }
             }, 1000);
@@ -93,14 +129,16 @@
 
         function addSet() {
             completedSets++;
-            document.getElementById('setCounter').textContent = completedSets;
+            const setCounterEl = document.getElementById('setCounter');
+            if (setCounterEl) setCounterEl.textContent = completedSets;
             localStorage.setItem('workoutSets', completedSets);
-            startTimer(60); // Automatycznie odpala stoper 60s po serii
+            startTimer(60);
         }
 
         function resetWorkout() {
             completedSets = 0;
-            document.getElementById('setCounter').textContent = 0;
+            const setCounterEl = document.getElementById('setCounter');
+            if (setCounterEl) setCounterEl.textContent = 0;
             localStorage.removeItem('workoutSets');
             clearInterval(timerInterval);
             timeLeft = 60;
