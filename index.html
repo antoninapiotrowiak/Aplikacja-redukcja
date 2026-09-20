@@ -240,5 +240,32 @@
         updateCalorieUI();
         renderMeasurements();
     </script>
+    <script type="module">
+  // 1. Importujemy bazę Firestore zamiast samych statystyk Analytics
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+  // 2. Twój skopiowany kod konfiguracyjny
+  const firebaseConfig = {
+    apiKey: "AIzaSyAlD9a5WqfBIYWLh4okyGSI8AY1obeox50",
+    authDomain: "mojaaplikacja-6bfaa.firebaseapp.com",
+    projectId: "mojaaplikacja-6bfaa",
+    storageBucket: "mojaaplikacja-6bfaa.firebasestorage.app",
+    messagingSenderId: "586745068789",
+    appId: "1:586745068789:web:024245da595f9a11b299bc",
+    measurementId: "G-M0K7DTZRN1"
+  };
+
+  // 3. Inicjalizacja Firebase oraz bazy danych Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Udostępniamy bazę do reszty skryptów na stronie
+  window.db = db;
+  window.collection = collection;
+  window.addDoc = addDoc;
+  window.onSnapshot = onSnapshot;
+</script>
+    
 </body>
 </html>
