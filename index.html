@@ -124,6 +124,20 @@
             font-weight: 800;
             font-size: 0.85rem;
             cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-bottom: 8px;
         }
 
         .history-row {
@@ -157,6 +171,19 @@
         <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
     </nav>
 
+    <!-- KARTA POWIADOMIEŃ PRZYPOMINAJĄCYCH -->
+    <div class="card">
+        <h2>🔔 Przypomnienia i Powiadomienia</h2>
+        <p style="font-size:0.8rem; color:#7a8b99; margin-bottom:12px;">
+            Włącz interaktywne powiadomienia, aby nie zapomnieć o wpisaniu kalorii oraz o treningu!
+        </p>
+        <button class="btn-main" onclick="requestNotificationPermission()">⚡ Włącz powiadomienia</button>
+        <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" onclick="testMealNotification()">🍽️ Test Posiłków</button>
+            <button class="btn-secondary" onclick="testWorkoutNotification()">⏱️ Test Treningu</button>
+        </div>
+    </div>
+
     <!-- CELE I PASEK POSTĘPU KALORII -->
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -189,8 +216,73 @@
         <div id="measurementsHistory" style="margin-top: 15px;"></div>
     </div>
 
-    <!-- SKRYPT INTERFEJSU -->
+    <!-- SKRYPT INTERFEJSU I POWIADOMIEŃ -->
     <script>
+        // Rejestracja Service Workera dla powiadomień
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker zarejestrowany!'))
+                .catch(err => console.error('Błąd rejestracji SW:', err));
+        }
+
+        // Prośba o zgodę na powiadomienia
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                alert('Twoja przeglądarka nie obsługuje powiadomień.');
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                alert('Super! Powiadomienia zostały włączone 🎉');
+            } else if (permission === 'denied') {
+                alert('Powiadomienia zostały zablokowane w ustawieniach przeglądarki.');
+            }
+        }
+
+        // Testowe powiadomienie o Posiłkach z przyciskami
+        async function testMealNotification() {
+            if (Notification.permission !== 'granted') {
+                await requestNotificationPermission();
+            }
+
+            if (Notification.permission === 'granted' && navigator.serviceWorker.ready) {
+                const reg = await navigator.serviceWorker.ready;
+                reg.showNotification('Czas na wpisanie posiłku! 🍽️', {
+                    body: 'Jak tam dzisiejszy bilans kalorii? Uzupełnij swoje posiłki!',
+                    vibrate: [200, 100, 200],
+                    requireInteraction: true,
+                    data: { url: '/posilki.html' },
+                    actions: [
+                        { action: 'open-posilki', title: '🍽️ Zapisz posiłki' },
+                        { action: 'snooze', title: '⏰ Za godzinę' }
+                    ]
+                });
+            }
+        }
+
+        // Testowe powiadomienie o Treningu z przyciskami
+        async function testWorkoutNotification() {
+            if (Notification.permission !== 'granted') {
+                await requestNotificationPermission();
+            }
+
+            if (Notification.permission === 'granted' && navigator.serviceWorker.ready) {
+                const reg = await navigator.serviceWorker.ready;
+                reg.showNotification('Czas na dzisiejszy trening! ⏱️', {
+                    body: 'Gotowa na małą aktywność? Ruszajmy po formę!',
+                    vibrate: [300, 100, 300],
+                    requireInteraction: true,
+                    data: { url: '/trening.html' },
+                    actions: [
+                        { action: 'open-trening', title: '⏱️ Rozpocznij trening' },
+                        { action: 'snooze', title: '⏰ Później' }
+                    ]
+                });
+            }
+        }
+
+        // Reszta logiki kalorycznej i pomiarów
         let calorieGoal = parseInt(localStorage.getItem('userCalorieGoal')) || 2000;
 
         function updateCalorieUI() {
@@ -336,7 +428,7 @@
             console.error("Błąd po przekierowaniu:", error);
         });
 
-        // LOGOWANIE BEZ POP-UPU (PRZEKIEROWANIE)
+        // LOGOWANIE BEZ POP-UPU
         window.zalogujZGoogle = async function() {
             try {
                 await signInWithRedirect(auth, provider);
