@@ -2,6 +2,8 @@
 <html lang="pl">
 <head>
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikacja Fitness 🌟</title>
@@ -218,14 +220,12 @@
 
     <!-- SKRYPT INTERFEJSU I POWIADOMIEŃ -->
     <script>
-        // Rejestracja Service Workera dla powiadomień
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
                 .then(reg => console.log('Service Worker zarejestrowany!'))
                 .catch(err => console.error('Błąd rejestracji SW:', err));
         }
 
-        // Prośba o zgodę na powiadomienia
         async function requestNotificationPermission() {
             if (!('Notification' in window)) {
                 alert('Twoja przeglądarka nie obsługuje powiadomień.');
@@ -240,7 +240,6 @@
             }
         }
 
-        // Testowe powiadomienie o Posiłkach z przyciskami
         async function testMealNotification() {
             if (Notification.permission !== 'granted') {
                 await requestNotificationPermission();
@@ -261,7 +260,6 @@
             }
         }
 
-        // Testowe powiadomienie o Treningu z przyciskami
         async function testWorkoutNotification() {
             if (Notification.permission !== 'granted') {
                 await requestNotificationPermission();
@@ -282,7 +280,6 @@
             }
         }
 
-        // Reszta logiki kalorycznej i pomiarów
         let calorieGoal = parseInt(localStorage.getItem('userCalorieGoal')) || 2000;
 
         function updateCalorieUI() {
@@ -423,12 +420,10 @@
 
         let unsubscribeSnapshot = null;
 
-        // Odbiór wyniku po przekierowaniu
         getRedirectResult(auth).catch((error) => {
             console.error("Błąd po przekierowaniu:", error);
         });
 
-        // LOGOWANIE BEZ POP-UPU
         window.zalogujZGoogle = async function() {
             try {
                 await signInWithRedirect(auth, provider);
@@ -438,7 +433,6 @@
             }
         };
 
-        // WYLOGOWANIE
         window.wylogujZGoogle = async function() {
             try {
                 await signOut(auth);
@@ -447,7 +441,6 @@
             }
         };
 
-        // STAN ZALOGOWANIA (NA ŻYWO)
         onAuthStateChanged(auth, (user) => {
             const userInfo = document.getElementById('userInfo');
             const authBtn = document.getElementById('authBtn');
@@ -483,7 +476,6 @@
             }
         });
 
-        // ZAPISYWANIE POMIARU
         window.zapiszPomiarDoFirebase = async function(weight, waist) {
             if (!window.currentUser) return;
 
@@ -501,7 +493,6 @@
             }
         };
 
-        // USUWANIE POMIARU
         window.usunPomiarZFirebase = async function(id) {
             try {
                 await deleteDoc(doc(db, "pomiary", id));
