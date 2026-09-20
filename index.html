@@ -693,41 +693,32 @@
         }
 
         function addFullMeal() {
-            const type = document.getElementById('mealType').value;
-            const name = document.getElementById('mealNameInput').value || 'Posiłek';
-            const kcal = parseInt(document.getElementById('mealKcalInput').value);
+            const typeInput = document.getElementById('mealType');
+            const nameInput = document.getElementById('mealNameInput');
+            const kcalInput = document.getElementById('mealKcalInput');
 
-            if (kcal) {
-                todayMeals.push({ type, name, kcal });
-                localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
-                
-                // Jeśli masz zmienną eaten z pierwszego kalkulatora
-                if (typeof eaten !== 'undefined') {
-                    eaten += kcal;
-                    if (typeof updateCalorieUI === 'function') updateCalorieUI();
-                }
-                
-                document.getElementById('mealNameInput').value = '';
-                document.getElementById('mealKcalInput').value = '';
-                
-                renderMeals();
+            if (!kcalInput || !kcalInput.value) {
+                alert("Wpisz liczbę kalorii! ☁️");
+                return;
             }
-        }
 
-        function removeMeal(index) {
+            const type = typeInput ? typeInput.value : 'Posiłek';
+            const name = (nameInput && nameInput.value) ? nameInput.value : 'Posiłek';
+            const kcal = parseInt(kcalInput.value);
+
+            todayMeals.push({ type, name, kcal });
+            localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
+            
             if (typeof eaten !== 'undefined') {
-                const removedKcal = todayMeals[index].kcal;
-                eaten = Math.max(0, eaten - removedKcal);
+                eaten += kcal;
                 if (typeof updateCalorieUI === 'function') updateCalorieUI();
             }
-
-            todayMeals.splice(index, 1);
-            localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
+            
+            if (nameInput) nameInput.value = '';
+            if (kcalInput) kcalInput.value = '';
+            
             renderMeals();
         }
-
-        // Wywołanie przy załadowaniu strony
-        renderMeals();
     </script>
 </body>
 </html>
