@@ -1,133 +1,384 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Szczegółowe Posiłki 🍽️</title>
-    <link rel="stylesheet" href="style.css"> <!-- Jeśli masz osobny plik ze stylami CSS -->
+    <title>Posiłki - Aplikacja Fitness 🍽️</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-light: #edf4f8;
+            --text: #2c3e50;
+            --bg: #f4f7f9;
+            --card-bg: #ffffff;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        .btn-google {
+            background: #4285F4;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #7a8b99;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 10px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .meal-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            border: 1px solid #edf2f7;
+        }
+    </style>
 </head>
-<body style="font-family: system-ui, sans-serif; background: #f4f7f9; padding: 15px; max-width: 500px; margin: 0 auto;">
+<body>
 
-    <!-- PASEK NAWIGACJI -->
-   <nav class="top-nav">
-    <a href="index.html" class="nav-link">🏠 Główna</a>
-    <a href="posilki.html" class="nav-link active">🍽️ Posiłki</a>
-    <a href="trening.html" class="nav-link">⏱️ Trening</a>
-    <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
-</nav>
-<style>
-.top-nav {
-    display: flex;
-    justify-content: space-around;
-    background: #ffffff;
-    padding: 12px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-}
-.nav-link {
-    text-decoration: none;
-    color: #7a8b99;
-    font-weight: 700;
-    font-size: 0.9rem;
-    padding: 8px 12px;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-.nav-link:hover, .nav-link.active {
-    color: var(--primary, #4a90e2);
-    background: var(--primary-light, #edf4f8);
-}
-</style>
-    <!-- SZCZEGÓŁOWY DZIENNIK POSIŁKÓW -->
-    <div class="card" style="background:#fff; padding:20px; border-radius:20px; box-shadow:0 4px 15px rgba(0,0,0,0.04);">
-        <h2>🍽️ Dzisiejsze Posiłki</h2>
-        
-        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-            <select id="mealType" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #e1e8ed;">
-                <option value="🥣 Śniadanie">🥣 Śniadanie</option>
-                <option value="🥗 Obiad">🥗 Obiad</option>
-                <option value="🥪 Kolacja">🥪 Kolacja</option>
-                <option value="🍎 Przekąska">🍎 Przekąska</option>
-            </select>
-            <input type="number" id="mealKcalInput" placeholder="kcal" style="width: 35%; padding: 10px; border-radius: 10px; border: 1px solid #e1e8ed;">
+    <!-- PASEK UŻYTKOWNIKA -->
+    <div class="user-bar">
+        <div id="userInfo" style="font-weight: 700; font-size: 0.85rem; color: var(--text);">
+            🔒 Niezalogowano
         </div>
-        
-        <input type="text" id="mealNameInput" placeholder="Nazwa posiłku (np. Owsianka)" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e1e8ed; box-sizing: border-box; margin-bottom: 10px;">
-        <button onclick="addFullMeal()" style="width: 100%; padding: 12px; border: none; border-radius: 12px; background: #4a90e2; color: #fff; font-weight: bold; cursor: pointer;">Dodaj Posiłek do Menu ✨</button>
+        <button id="authBtn" class="btn-google" onclick="handleAuth()">Zaloguj z Google</button>
+    </div>
 
-        <div id="mealsList" style="margin-top: 15px;"></div>
+    <!-- NAWIGACJA -->
+    <nav class="top-nav">
+        <a href="index.html" class="nav-link">🏠 Główna</a>
+        <a href="posilki.html" class="nav-link active">🍽️ Posiłki</a>
+        <a href="trening.html" class="nav-link">⏱️ Trening</a>
+        <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
+    </nav>
+
+    <!-- DODAWANIE POSIŁKU -->
+    <div class="card">
+        <h2>➕ Dodaj Posiłek</h2>
+        
+        <select id="mealType">
+            <option value="sniadanie">🥣 Śniadanie</option>
+            <option value="obiad">🍲 Obiad</option>
+            <option value="kolacja">🥗 Kolacja</option>
+            <option value="przekaska">🍎 Przekąska</option>
+        </select>
+
+        <input type="text" id="mealName" placeholder="Nazwa posiłku (np. Owsianka)">
+        <input type="number" id="mealKcal" placeholder="Kalorie (kcal)">
+
+        <button class="btn-main" onclick="addMeal()">💾 Zapisz posiłek</button>
+    </div>
+
+    <!-- LISTA DZISIEJSZYCH POSIŁKÓW -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2>📋 Dzisiejsze posiłki</h2>
+            <strong style="color: var(--primary); font-size: 1rem;" id="totalKcalLabel">0 kcal</strong>
+        </div>
+
+        <div id="mealsList"></div>
     </div>
 
     <script>
-        let todayMeals = JSON.parse(localStorage.getItem('todayMeals')) || [];
+        function handleAuth() {
+            if (window.currentUser) {
+                if (typeof window.wylogujZGoogle === "function") window.wylogujZGoogle();
+            } else {
+                if (typeof window.zalogujZGoogle === "function") window.zalogujZGoogle();
+            }
+        }
 
-        function renderMeals() {
-            const list = document.getElementById('mealsList');
-            if (!list) return;
-            list.innerHTML = '';
-
-            if (todayMeals.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.85rem; padding:10px;">Brak zapisanych posiłków na dziś ☁️</p>';
+        function addMeal() {
+            if (!window.currentUser) {
+                alert("Zaloguj się przez Google, aby dodawać posiłki!");
                 return;
             }
 
-            todayMeals.forEach((meal, index) => {
-                list.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#fafcfe; padding:10px 14px; border-radius:12px; margin-bottom:8px; border:1px solid #edf4f8;">
+            const mealType = document.getElementById('mealType').value;
+            const name = document.getElementById('mealName').value.trim();
+            const kcal = parseInt(document.getElementById('mealKcal').value);
+
+            if (!name || isNaN(kcal) || kcal <= 0) {
+                alert("Wpisz poprawną nazwę i kalorie!");
+                return;
+            }
+
+            // Oznaczamy posiłek jako zrobiony dla automatycznych przypomnień
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (mealType === 'sniadanie') {
+                localStorage.setItem(`breakfast_${todayStr}`, 'true');
+            } else if (mealType === 'obiad') {
+                localStorage.setItem(`lunch_${todayStr}`, 'true');
+            } else if (mealType === 'kolacja') {
+                localStorage.setItem(`dinner_${todayStr}`, 'true');
+            }
+
+            if (typeof window.zapiszPosilekDoFirebase === "function") {
+                window.zapiszPosilekDoFirebase(mealType, name, kcal);
+            }
+
+            document.getElementById('mealName').value = '';
+            document.getElementById('mealKcal').value = '';
+        }
+
+        function renderMeals(meals = []) {
+            const container = document.getElementById('mealsList');
+            const totalLabel = document.getElementById('totalKcalLabel');
+            if (!container) return;
+
+            container.innerHTML = '';
+            let total = 0;
+
+            if (!meals || meals.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.8rem;">Brak zapisanych posiłków na dziś 🍽️</p>';
+                if (totalLabel) totalLabel.textContent = '0 kcal';
+                localStorage.setItem('todayCalories', 0);
+                return;
+            }
+
+            const icons = {
+                sniadanie: '🥣',
+                obiad: '🍲',
+                kolacja: '🥗',
+                przekaska: '🍎'
+            };
+
+            meals.forEach((m) => {
+                total += parseInt(m.kcal) || 0;
+                container.innerHTML += `
+                    <div class="meal-row">
                         <div>
-                            <span style="font-size:0.75rem; font-weight:700; color:#4a90e2; background:#edf4f8; padding:2px 8px; border-radius:8px;">${meal.type}</span>
-                            <div style="font-weight:700; color:#2c3e50; margin-top:2px;">${meal.name}</div>
+                            <strong>${icons[m.type] || '🍽️'} ${m.name}</strong>
+                            <div style="font-size:0.75rem; color:#7a8b99;">${m.kcal} kcal</div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-weight:800; color:#4a90e2;">${meal.kcal} kcal</span>
-                            <button onclick="removeMeal(${index})" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">🗑️</button>
-                        </div>
+                        <button onclick="deleteMeal('${m.id}')" style="background:none; border:none; cursor:pointer;">🗑️</button>
                     </div>
                 `;
             });
+
+            if (totalLabel) totalLabel.textContent = total + ' kcal';
+            localStorage.setItem('todayCalories', total);
         }
 
-        function addFullMeal() {
-            const typeInput = document.getElementById('mealType');
-            const nameInput = document.getElementById('mealNameInput');
-            const kcalInput = document.getElementById('mealKcalInput');
-
-            if (!kcalInput || !kcalInput.value) {
-                alert("Wpisz liczbę kalorii! ☁️");
-                return;
+        function deleteMeal(id) {
+            if (typeof window.usunPosilekZFirebase === "function") {
+                window.usunPosilekZFirebase(id);
             }
-
-            const type = typeInput ? typeInput.value : 'Posiłek';
-            const name = (nameInput && nameInput.value) ? nameInput.value : 'Posiłek';
-            const kcal = parseInt(kcalInput.value);
-
-            todayMeals.push({ type, name, kcal });
-            localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
-            
-            // Dolicza kalorie do głównego licznika z pliku index.html!
-            let eaten = parseInt(localStorage.getItem('eatenKcal')) || 0;
-            eaten += kcal;
-            localStorage.setItem('eatenKcal', eaten);
-
-            if (nameInput) nameInput.value = '';
-            if (kcalInput) kcalInput.value = '';
-            
-            renderMeals();
         }
+    </script>
 
-        function removeMeal(index) {
-            let eaten = parseInt(localStorage.getItem('eatenKcal')) || 0;
-            const removedKcal = todayMeals[index].kcal;
-            eaten = Math.max(0, eaten - removedKcal);
-            localStorage.setItem('eatenKcal', eaten);
+    <!-- FIREBASE MODULE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithRedirect, 
+            getRedirectResult,
+            GoogleAuthProvider, 
+            signOut, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            onSnapshot, 
+            deleteDoc, 
+            doc,
+            query,
+            where
+        } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-            todayMeals.splice(index, 1);
-            localStorage.setItem('todayMeals', JSON.stringify(todayMeals));
-            renderMeals();
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlD9a5WqfBIYWLh4okyGSI8AY1obeox50",
+            authDomain: "mojaaplikacja-6bfaa.firebaseapp.com",
+            projectId: "mojaaplikacja-6bfaa",
+            storageBucket: "mojaaplikacja-6bfaa.firebasestorage.app",
+            messagingSenderId: "586745068789",
+            appId: "1:024245da595f9a11b299bc",
+            measurementId: "G-M0K7DTZRN1"
+        };
 
-        renderMeals();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let unsubscribeSnapshot = null;
+
+        getRedirectResult(auth).catch((error) => {
+            console.error("Błąd po przekierowaniu:", error);
+        });
+
+        window.zalogujZGoogle = async function() {
+            try {
+                await signInWithRedirect(auth, provider);
+            } catch (error) {
+                console.error("Błąd logowania:", error);
+                alert("Nie udało się zalogować: " + error.message);
+            }
+        };
+
+        window.wylogujZGoogle = async function() {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Błąd wylogowania:", error);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            const userInfo = document.getElementById('userInfo');
+            const authBtn = document.getElementById('authBtn');
+
+            if (user) {
+                window.currentUser = user;
+                userInfo.innerHTML = `👤 ${user.displayName || 'Zalogowano'}`;
+                authBtn.textContent = 'Wyloguj';
+                authBtn.style.background = '#e74c3c';
+
+                const todayStr = new Date().toLocaleDateString('pl-PL');
+                const q = query(
+                    collection(db, "posilki"), 
+                    where("userId", "==", user.uid),
+                    where("date", "==", todayStr)
+                );
+                
+                if (unsubscribeSnapshot) unsubscribeSnapshot();
+                
+                unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+                    let meals = [];
+                    snapshot.forEach((doc) => {
+                        meals.push({ id: doc.id, ...doc.data() });
+                    });
+                    renderMeals(meals);
+                });
+
+            } else {
+                window.currentUser = null;
+                userInfo.innerHTML = '🔒 Niezalogowano';
+                authBtn.textContent = 'Zaloguj z Google';
+                authBtn.style.background = '#4285F4';
+
+                if (unsubscribeSnapshot) unsubscribeSnapshot();
+                renderMeals([]);
+            }
+        });
+
+        window.zapiszPosilekDoFirebase = async function(type, name, kcal) {
+            if (!window.currentUser) return;
+
+            try {
+                const todayStr = new Date().toLocaleDateString('pl-PL');
+                await addDoc(collection(db, "posilki"), {
+                    userId: window.currentUser.uid,
+                    date: todayStr,
+                    type: type,
+                    name: name,
+                    kcal: kcal,
+                    created: new Date().getTime()
+                });
+            } catch (e) {
+                console.error("Błąd zapisu posiłku:", e);
+            }
+        };
+
+        window.usunPosilekZFirebase = async function(id) {
+            try {
+                await deleteDoc(doc(db, "posilki", id));
+            } catch (e) {
+                console.error("Błąd usuwania posiłku:", e);
+            }
+        };
     </script>
 </body>
 </html>
