@@ -155,31 +155,36 @@
         <div id="measurementsHistory" style="margin-top: 15px;"></div>
     </div>
 
+    <!-- SKRYPT INTERFEJSU -->
     <script>
         let calorieGoal = parseInt(localStorage.getItem('userCalorieGoal')) || 2000;
-        let measurements = JSON.parse(localStorage.getItem('userMeasurementsHistory')) || [];
 
         function updateCalorieUI() {
             const todayKcal = parseInt(localStorage.getItem('todayCalories')) || 0;
-            document.getElementById('currentKcalDisplay').textContent = todayKcal;
-            document.getElementById('goalKcalDisplay').textContent = calorieGoal;
+            const currentDisplay = document.getElementById('currentKcalDisplay');
+            const goalDisplay = document.getElementById('goalKcalDisplay');
+
+            if (currentDisplay) currentDisplay.textContent = todayKcal;
+            if (goalDisplay) goalDisplay.textContent = calorieGoal;
 
             const percent = Math.min(Math.round((todayKcal / calorieGoal) * 100), 100);
             const bar = document.getElementById('kcalProgressBar');
-            bar.style.width = percent + '%';
+            if (bar) bar.style.width = percent + '%';
 
             const remaining = calorieGoal - todayKcal;
             const status = document.getElementById('kcalStatusText');
 
-            if (remaining > 0) {
-                status.textContent = `Pozostało do wykorzystania: ${remaining} kcal`;
-                bar.style.backgroundColor = '#4a90e2';
-            } else if (remaining === 0) {
-                status.textContent = `Idealnie! Osiągnięto dzisiejszy cel! 🎉`;
-                bar.style.backgroundColor = '#2ecc71';
-            } else {
-                status.textContent = `Przekroczono cel o ${Math.abs(remaining)} kcal ⚡`;
-                bar.style.backgroundColor = '#e74c3c';
+            if (status && bar) {
+                if (remaining > 0) {
+                    status.textContent = `Pozostało do wykorzystania: ${remaining} kcal`;
+                    bar.style.backgroundColor = '#4a90e2';
+                } else if (remaining === 0) {
+                    status.textContent = `Idealnie! Osiągnięto dzisiejszy cel! 🎉`;
+                    bar.style.backgroundColor = '#2ecc71';
+                } else {
+                    status.textContent = `Przekroczono cel o ${Math.abs(remaining)} kcal ⚡`;
+                    bar.style.backgroundColor = '#e74c3c';
+                }
             }
         }
 
@@ -192,6 +197,7 @@
             }
         }
 
+        // POŁĄCZENIE Z FIREBASE
         function saveMeasurement() {
             const weight = document.getElementById('weightInput').value;
             const waist = document.getElementById('waistInput').value;
@@ -201,71 +207,109 @@
                 return;
             }
 
-            const dateStr = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
-            measurements.unshift({ date: dateStr, weight: weight, waist: waist });
-            localStorage.setItem('userMeasurementsHistory', JSON.stringify(measurements));
+            if (typeof window.zapiszPomiarDoFirebase === "function") {
+                window.zapiszPomiarDoFirebase(weight, waist);
+            }
 
             document.getElementById('weightInput').value = '';
             document.getElementById('waistInput').value = '';
-
-            renderMeasurements();
         }
 
-        function renderMeasurements() {
+        function renderMeasurements(data = []) {
             const container = document.getElementById('measurementsHistory');
+            if (!container) return;
+
             container.innerHTML = '';
 
-            if (measurements.length === 0) {
+            if (!data || data.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.8rem;">Brak zapisanych pomiarów ☁️</p>';
                 return;
             }
 
-            measurements.forEach((m, idx) => {
+            data.forEach((m) => {
                 container.innerHTML += `
                     <div class="history-row">
                         <strong style="color:var(--primary);">${m.date}</strong>
                         <span>${m.weight ? '⚖️ ' + m.weight + ' kg' : ''} ${m.waist ? '📏 ' + m.waist + ' cm' : ''}</span>
-                        <button onclick="deleteMeasurement(${idx})" style="background:none; border:none; cursor:pointer;">🗑️</button>
+                        <button onclick="deleteMeasurement('${m.id}')" style="background:none; border:none; cursor:pointer;">🗑️</button>
                     </div>
                 `;
             });
         }
 
-        function deleteMeasurement(idx) {
-            measurements.splice(idx, 1);
-            localStorage.setItem('userMeasurementsHistory', JSON.stringify(measurements));
-            renderMeasurements();
+        function deleteMeasurement(id) {
+            if (typeof window.usunPomiarZFirebase === "function") {
+                window.usunPomiarZFirebase(id);
+            }
         }
 
         updateCalorieUI();
-        renderMeasurements();
     </script>
+
+    <!-- MODULE FIREBASE -->
     <script type="module">
-  // 1. Importujemy bazę Firestore zamiast samych statystyk Analytics
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            onSnapshot, 
+            deleteDoc, 
+            doc 
+        } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-  // 2. Twój skopiowany kod konfiguracyjny
-  const firebaseConfig = {
-    apiKey: "AIzaSyAlD9a5WqfBIYWLh4okyGSI8AY1obeox50",
-    authDomain: "mojaaplikacja-6bfaa.firebaseapp.com",
-    projectId: "mojaaplikacja-6bfaa",
-    storageBucket: "mojaaplikacja-6bfaa.firebasestorage.app",
-    messagingSenderId: "586745068789",
-    appId: "1:586745068789:web:024245da595f9a11b299bc",
-    measurementId: "G-M0K7DTZRN1"
-  };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlD9a5WqfBIYWLh4okyGSI8AY1obeox50",
+            authDomain: "mojaaplikacja-6bfaa.firebaseapp.com",
+            projectId: "mojaaplikacja-6bfaa",
+            storageBucket: "mojaaplikacja-6bfaa.firebasestorage.app",
+            messagingSenderId: "586745068789",
+            appId: "1:024245da595f9a11b299bc",
+            measurementId: "G-M0K7DTZRN1"
+        };
 
-  // 3. Inicjalizacja Firebase oraz bazy danych Firestore
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-  // Udostępniamy bazę do reszty skryptów na stronie
-  window.db = db;
-  window.collection = collection;
-  window.addDoc = addDoc;
-  window.onSnapshot = onSnapshot;
-</script>
-    
+        // ZAPISYWANIE POMIARU DO BAZY
+        window.zapiszPomiarDoFirebase = async function(weight, waist) {
+            try {
+                const dateStr = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+                await addDoc(collection(db, "pomiary"), {
+                    date: dateStr,
+                    weight: weight,
+                    waist: waist,
+                    created: new Date().getTime()
+                });
+                console.log("Pomiar zapisany w Firebase!");
+            } catch (e) {
+                console.error("Błąd zapisu pomiaru:", e);
+            }
+        };
+
+        // USUWANIE POMIARU Z BAZY
+        window.usunPomiarZFirebase = async function(id) {
+            try {
+                await deleteDoc(doc(db, "pomiary", id));
+                console.log("Pomiar usunięty z Firebase!");
+            } catch (e) {
+                console.error("Błąd usuwania pomiaru:", e);
+            }
+        };
+
+        // NASŁUCHIWANIE NA ŻYWO (SYNCHRONIZACJA)
+        onSnapshot(collection(db, "pomiary"), (snapshot) => {
+            let firebaseMeasurements = [];
+            snapshot.forEach((doc) => {
+                firebaseMeasurements.push({ id: doc.id, ...doc.data() });
+            });
+
+            firebaseMeasurements.sort((a, b) => (b.created || 0) - (a.created || 0));
+
+            if (typeof renderMeasurements === "function") {
+                renderMeasurements(firebaseMeasurements);
+            }
+        });
+    </script>
 </body>
 </html>
