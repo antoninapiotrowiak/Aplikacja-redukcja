@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szybkie Przepisy 🥗</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-light: #edf4f8;
+            --text: #2c3e50;
+            --bg: #f4f7f9;
+            --card-bg: #ffffff;
+            --accent: #e67e22;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* NAWIGACJA */
+        .top-nav {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #7a8b99;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 10px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .recipe-card {
+            background: #ffffff;
+            border: 1px solid #edf2f7;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .recipe-title {
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: #2c3e50;
+        }
+
+        .recipe-tag {
+            background: #fff3e0;
+            color: #e67e22;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .macro-badge {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .ingredients-list {
+            font-size: 0.85rem;
+            color: #5a6e7f;
+            margin-bottom: 12px;
+            padding-left: 18px;
+            line-height: 1.4;
+        }
+
+        .steps-text {
+            font-size: 0.85rem;
+            color: #7a8b99;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: #2ecc71;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-add:active {
+            background: #27ae60;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAWIGACJA -->
+    <nav class="top-nav">
+        <a href="index.html" class="nav-link">🏠 Główna</a>
+        <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
+        <a href="trening.html" class="nav-link">⏱️ Trening</a>
+        <a href="przepisy.html" class="nav-link active">🥗 Przepisy</a>
+    </nav>
+
+    <!-- WYSZUKIWARKA -->
+    <div class="card" style="padding-bottom: 5px;">
+        <h2>🔍 Znajdź Przepis</h2>
+        <input type="text" id="searchInput" class="search-input" placeholder="Szukaj np. ciastko, owsianka, air fryer..." onkeyup="filterRecipes()">
+    </div>
+
+    <!-- LISTA PRZEPISÓW -->
+    <div id="recipesContainer"></div>
+
+    <script>
+        // Baza gotowych przepisów
+        const recipes = [
+            {
+                id: 1,
+                title: "🍫 Czekoladowe Ciastko z Air Fryera",
+                tag: "Air Fryer ⏱️ 8 min",
+                kcal: 280,
+                protein: 12,
+                ingredients: [
+                    "1 dojrzały banan",
+                    "1 jajko",
+                    "1 łyżka kakao (10g)",
+                    "3 łyżki mąki owsianej lub orkiszowej (30g)",
+                    "1/2 łyżeczki proszku do pieczenia",
+                    "Kostka gorzkiej czekolady na wierzch"
+                ],
+                steps: "Zblenduj lub rozgnieć banana z jajkiem, kakao, mąką i proszkiem. Przelej do małej kokilki. Na wierzch połóż kostkę czekolady. Piecz w Air Fryerze: 180°C przez 8 minut.",
+            },
+            {
+                id: 2,
+                title: "🥧 Pieczona Owsianka Cynamonowa",
+                tag: "Air Fryer ⏱️ 10 min",
+                kcal: 320,
+                protein: 14,
+                ingredients: [
+                    "40g płatków owsianych",
+                    "100ml mleka lub napoju roślinnego",
+                    "1/2 jabłka pokrojonego w kostkę",
+                    "1/2 łyżeczki cynamonu",
+                    "1 łyżeczka miodu lub erytrytolu"
+                ],
+                steps: "Wymieszaj płatki z mlekiem, cynamonem i miodem bezpośrednio w naczynku żaroodpornym. Wymieszaj z kawałkami jabłka. Piecz w Air Fryerze w 170°C przez 10 minut.",
+            },
+            {
+                id: 3,
+                title: "🥔 Chrupiące Bataty z Ziołami",
+                tag: "Air Fryer ⏱️ 15 min",
+                kcal: 210,
+                protein: 3,
+                ingredients: [
+                    "1 średni batat (ok. 200g)",
+                    "1 łyżeczka oliwy z oliwek",
+                    "Sól, słodka papryka, oregano, czosnek granulowany"
+                ],
+                steps: "Batata obierz i pokrój w słupki/frytki. Wymieszaj w misce z oliwą i przyprawami. Piecz w Air Fryerze w 190°C przez 12-15 minut, potrząsając koszykiem w połowie czasu.",
+            },
+            {
+                id: 4,
+                title: "🧁 Czekoladowy Mugcake z Mikrofalówki",
+                tag: "Szybkie ⏱️ 3 min",
+                kcal: 250,
+                protein: 10,
+                ingredients: [
+                    "1 jajko",
+                    "2 łyżki mleka",
+                    "1 łyżka kakao",
+                    "2 łyżki mąki",
+                    "1/2 łyżeczki słodzika lub miodu"
+                ],
+                steps: "Wymieszaj wszystkie składniki widelcem w kubku. Wstaw do mikrofalówki na 90 sekund (moc 800W). Gotowe!",
+            }
+        ];
+
+        function renderRecipes(items) {
+            const container = document.getElementById('recipesContainer');
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="card" style="text-align:center; color:#7a8b99;">Nie znaleziono przepisów o tej nazwie ☁️</div>';
+                return;
+            }
+
+            items.forEach(r => {
+                const ingredientsHtml = r.ingredients.map(ing => `<li>${ing}</li>`).join('');
+                container.innerHTML += `
+                    <div class="recipe-card">
+                        <div class="recipe-header">
+                            <div class="recipe-title">${r.title}</div>
+                            <span class="recipe-tag">${r.tag}</span>
+                        </div>
+                        
+                        <div class="macro-badge">🔥 ${r.kcal} kcal | 💪 ${r.protein}g białka</div>
+                        
+                        <div style="font-size:0.8rem; font-weight:700; color:#2c3e50; margin-bottom:4px;">Składniki:</div>
+                        <ul class="ingredients-list">${ingredientsHtml}</ul>
+
+                        <div style="font-size:0.8rem; font-weight:700; color:#2c3e50; margin-bottom:4px;">Przygotowanie:</div>
+                        <div class="steps-text">${r.steps}</div>
+
+                        <button class="btn-add" onclick="addCaloriesToMain(${r.kcal}, '${r.title}')">
+                            + Dodaj ${r.kcal} kcal do dzisiejszego bilansu ✨
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function filterRecipes() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = recipes.filter(r => 
+                r.title.toLowerCase().includes(query) || 
+                r.ingredients.some(ing => ing.toLowerCase().includes(query)) ||
+                r.tag.toLowerCase().includes(query)
+            );
+            renderRecipes(filtered);
+        }
+
+        function addCaloriesToMain(kcal, title) {
+            let currentKcal = parseInt(localStorage.getItem('todayCalories')) || 0;
+            currentKcal += kcal;
+            localStorage.setItem('todayCalories', currentKcal);
+
+            // Zapis w posiłkach
+            let todayMeals = JSON.parse(localStorage.getItem('todayMealsList')) || [];
+            const timeStr = new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+            todayMeals.push({ name: title, kcal: kcal, time: timeStr });
+            localStorage.setItem('todayMealsList', JSON.stringify(todayMeals));
+
+            alert(`Dodano "${title}" (${kcal} kcal) do Twojego bilansu! 🎈`);
+        }
+
+        renderRecipes(recipes);
+    </script>
+</body>
+</html>
