@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stoper i Trening ⏱️</title>
+    <title>Trening i Stoper ⏱️</title>
     <style>
         :root {
             --primary: #4a90e2;
@@ -22,6 +22,7 @@
             margin: 0 auto;
         }
 
+        /* NAWIGACJA */
         .top-nav {
             display: flex;
             justify-content: space-around;
@@ -36,8 +37,8 @@
             text-decoration: none;
             color: #7a8b99;
             font-weight: 700;
-            font-size: 0.9rem;
-            padding: 8px 12px;
+            font-size: 0.85rem;
+            padding: 8px 10px;
             border-radius: 10px;
             transition: all 0.2s ease;
         }
@@ -61,6 +62,60 @@
             margin-bottom: 15px;
             color: var(--text);
         }
+
+        .btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #7a8b99;
+            border: 1px solid #e1e8ed;
+        }
+
+        .preset-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            background: #fff;
+            font-weight: 700;
+            color: #5a6e7f;
+            cursor: pointer;
+        }
+
+        .preset-btn.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .exercise-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #edf2f7;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -70,43 +125,136 @@
         <a href="index.html" class="nav-link">🏠 Główna</a>
         <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
         <a href="trening.html" class="nav-link active">⏱️ Trening</a>
+        <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
     </nav>
 
-    <!-- STOPER PRZERW I LICZNIK SERII -->
+    <!-- STOPER PRZERW -->
     <div class="card">
-        <h2>⏱️ Stoper i Trening</h2>
-        
-        <div style="text-align: center; margin: 20px 0;">
+        <h2>⏱️ Stoper Przerw</h2>
+        <div style="text-align: center; margin-bottom: 15px;">
             <div id="timerDisplay" style="font-size: 2.8rem; font-weight: 800; color: #2c3e50; font-family: monospace;">01:00</div>
-            <p style="color: #7a8b99; font-size: 0.85rem; margin-top: 5px;">Liczba ukończonych serii: <span id="setCounter" style="font-weight: bold; color: #4a90e2;">0</span></p>
         </div>
-
-        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-            <button onclick="startTimer(30)" style="flex:1; padding: 10px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">30s</button>
-            <button onclick="startTimer(60)" style="flex:1; padding: 10px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">60s</button>
-            <button onclick="startTimer(90)" style="flex:1; padding: 10px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">90s</button>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <button onclick="addSet()" style="flex:2; padding: 12px; border: none; border-radius: 12px; background: #4a90e2; color: #fff; font-weight: bold; cursor: pointer;">+ Zalicz serię ✨</button>
-            <button onclick="resetWorkout()" style="flex:1; padding: 12px; border: 1px solid #e1e8ed; border-radius: 12px; background: #fff; color: #7a8b99; font-weight: bold; cursor: pointer;">Reset</button>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="startTimer(30)" style="flex:1; padding: 8px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">30s</button>
+            <button onclick="startTimer(60)" style="flex:1; padding: 8px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">60s</button>
+            <button onclick="startTimer(90)" style="flex:1; padding: 8px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">90s</button>
         </div>
     </div>
 
+    <!-- PLAN TRENINGOWY -->
+    <div class="card">
+        <h2>🏋️ Wybierz Plan Treningu</h2>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="preset-btn active" id="btnNormal" onclick="loadPreset('normal')">⚡ Normalny</button>
+            <button class="preset-btn" id="btnLazy" onclick="loadPreset('lazy')">☁️ Na Lenia</button>
+        </div>
+
+        <div id="exerciseList"></div>
+
+        <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 15px 0;">
+
+        <!-- CUSTOMIZACJA -->
+        <h3 style="font-size: 0.95rem; color: #7a8b99; margin-bottom: 10px;">➕ Dodaj własne ćwiczenie:</h3>
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="customExName" placeholder="np. Hip Thrust / Brzuszki" style="margin: 0;">
+            <button class="btn" onclick="addCustomExercise()">Dodaj</button>
+        </div>
+    </div>
+
+    <!-- HISTORIA DZISIEJSZEGO TRENINGU -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2>📝 Dzisiejsze Serie (<span id="totalSetsCount">0</span>)</h2>
+            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="clearWorkoutHistory()">Wyczyść</button>
+        </div>
+        <div id="workoutHistory"></div>
+    </div>
+
     <script>
+        // Gotowe zestawy ćwiczeń
+        const presets = {
+            normal: ["Przysiady", "Wykroki", "Pompki / Odwrotne pompki", "Glute Bridge", "Plank (Deska)"],
+            lazy: ["Glute Bridge na łóżku", "Wznosy nóg leżąc", "Rozciąganie / Cat-Cow", "Plank 30 sekund"]
+        };
+
+        let currentExercises = [...presets.normal];
+        let workoutHistory = JSON.parse(localStorage.getItem('todayWorkoutHistory')) || [];
         let timerInterval = null;
         let timeLeft = 60;
-        let completedSets = parseInt(localStorage.getItem('workoutSets')) || 0;
 
-        const setCounterEl = document.getElementById('setCounter');
-        if (setCounterEl) setCounterEl.textContent = completedSets;
+        function loadPreset(type) {
+            document.getElementById('btnNormal').classList.toggle('active', type === 'normal');
+            document.getElementById('btnLazy').classList.toggle('active', type === 'lazy');
+            currentExercises = [...presets[type]];
+            renderExercises();
+        }
 
+        function renderExercises() {
+            const list = document.getElementById('exerciseList');
+            list.innerHTML = '';
+            currentExercises.forEach((ex, idx) => {
+                list.innerHTML += `
+                    <div class="exercise-item">
+                        <span style="font-weight: 600; color: #2c3e50;">${ex}</span>
+                        <button class="btn" style="padding: 6px 12px; font-size: 0.8rem;" onclick="logSet('${ex}')">+ Zalicz serię ✨</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addCustomExercise() {
+            const input = document.getElementById('customExName');
+            if (input.value.trim() !== '') {
+                currentExercises.push(input.value.trim());
+                renderExercises();
+                input.value = '';
+            }
+        }
+
+        function logSet(exerciseName) {
+            workoutHistory.push({
+                name: exerciseName,
+                time: new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })
+            });
+            localStorage.setItem('todayWorkoutHistory', JSON.stringify(workoutHistory));
+            renderHistory();
+            startTimer(60); // Automatyczny stoper na 60s po serii
+        }
+
+        function renderHistory() {
+            const historyContainer = document.getElementById('workoutHistory');
+            const countEl = document.getElementById('totalSetsCount');
+            countEl.textContent = workoutHistory.length;
+            historyContainer.innerHTML = '';
+
+            if (workoutHistory.length === 0) {
+                historyContainer.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.85rem; padding:10px;">Brak zaliczonych serii dzisiaj ☁️</p>';
+                return;
+            }
+
+            workoutHistory.forEach((item, index) => {
+                historyContainer.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#fafcfe; border-radius:10px; margin-bottom:6px; border:1px solid #edf4f8;">
+                        <span style="font-weight:700; color:#4a90e2; font-size:0.9rem;">${item.name}</span>
+                        <span style="font-size:0.75rem; color:#a0b2bc;">${item.time}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function clearWorkoutHistory() {
+            if (confirm("Chcesz wyczyścić dzisiejszą historię treningu?")) {
+                workoutHistory = [];
+                localStorage.removeItem('todayWorkoutHistory');
+                renderHistory();
+            }
+        }
+
+        // STOPER
         function updateDisplay() {
-            const timerEl = document.getElementById('timerDisplay');
-            if (!timerEl) return;
             const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
             const seconds = (timeLeft % 60).toString().padStart(2, '0');
-            timerEl.textContent = `${minutes}:${seconds}`;
+            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
         }
 
         function startTimer(seconds) {
@@ -120,31 +268,15 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    const timerEl = document.getElementById('timerDisplay');
-                    if (timerEl) timerEl.textContent = "00:00";
+                    document.getElementById('timerDisplay').textContent = "00:00";
                     alert("Koniec przerwy! Czas na kolejną serię 💪");
                 }
             }, 1000);
         }
 
-        function addSet() {
-            completedSets++;
-            const setCounterEl = document.getElementById('setCounter');
-            if (setCounterEl) setCounterEl.textContent = completedSets;
-            localStorage.setItem('workoutSets', completedSets);
-            startTimer(60);
-        }
-
-        function resetWorkout() {
-            completedSets = 0;
-            const setCounterEl = document.getElementById('setCounter');
-            if (setCounterEl) setCounterEl.textContent = 0;
-            localStorage.removeItem('workoutSets');
-            clearInterval(timerInterval);
-            timeLeft = 60;
-            updateDisplay();
-        }
-
+        // Inicjalizacja
+        renderExercises();
+        renderHistory();
         updateDisplay();
     </script>
 </body>
