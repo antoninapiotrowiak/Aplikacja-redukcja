@@ -22,7 +22,7 @@
             margin: 0 auto;
         }
 
-        /* NAWIGACJA (Tylko Główna, Posiłki, Trening) */
+        /* NAWIGACJA */
         .top-nav {
             display: flex;
             justify-content: space-around;
@@ -63,61 +63,50 @@
             color: var(--text);
         }
 
-        .preset-btn {
+        .btn-start {
             flex: 1;
-            padding: 14px;
-            border: 2px solid #e1e8ed;
+            padding: 16px;
+            border: none;
             border-radius: 14px;
-            background: #fff;
+            background: var(--primary);
+            color: white;
             font-weight: 800;
-            font-size: 0.95rem;
-            color: #5a6e7f;
+            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+            transition: transform 0.1s ease;
         }
 
-        .preset-btn.active {
-            background: var(--primary-light);
-            color: var(--primary);
-            border-color: var(--primary);
+        .btn-start:active {
+            transform: scale(0.98);
         }
 
-        .ex-card {
-            background: #f8fafc;
-            border: 1px solid #edf2f7;
-            border-radius: 14px;
-            padding: 12px;
-            margin-bottom: 10px;
+        .btn-lazy {
+            background: #8e44ad;
+            box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);
         }
 
-        .ex-title {
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #2ecc71;
+            color: white;
+            font-weight: 800;
+            font-size: 1.05rem;
+            cursor: pointer;
+            margin-top: 10px;
         }
 
-        .set-btn-group {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .set-btn {
-            padding: 6px 12px;
-            border: 1px solid #e1e8ed;
-            border-radius: 8px;
-            background: #fff;
+        .btn-secondary {
+            background: transparent;
             color: #7a8b99;
-            font-weight: 700;
-            font-size: 0.8rem;
+            border: 1px solid #e1e8ed;
+            padding: 8px;
+            border-radius: 10px;
             cursor: pointer;
-        }
-
-        .set-btn.done {
-            background: #4a90e2;
-            color: #fff;
-            border-color: #4a90e2;
+            font-weight: 600;
         }
 
         input {
@@ -129,179 +118,238 @@
             margin-bottom: 10px;
         }
 
-        .btn {
-            padding: 10px 14px;
-            border: none;
-            border-radius: 10px;
-            background: var(--primary);
-            color: white;
+        .badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 700;
-            cursor: pointer;
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: #7a8b99;
-            border: 1px solid #e1e8ed;
         }
     </style>
 </head>
 <body>
 
-    <!-- PASEK NAWIGACJI -->
+    <!-- NAWIGACJA -->
     <nav class="top-nav">
         <a href="index.html" class="nav-link">🏠 Główna</a>
         <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
         <a href="trening.html" class="nav-link active">⏱️ Trening</a>
     </nav>
 
-    <!-- STOPER PRZERW -->
-    <div class="card">
-        <h2>⏱️ Stoper Przerw</h2>
-        <div style="text-align: center; margin-bottom: 12px;">
-            <div id="timerDisplay" style="font-size: 2.8rem; font-weight: 800; color: #2c3e50; font-family: monospace;">01:00</div>
+    <!-- AKTYWNY TRENING / TRYB AUTOMATYCZNY -->
+    <div class="card" id="activeWorkoutCard" style="display: none; text-align: center;">
+        <span class="badge" id="workoutTypeBadge">⚡ Trening Normalny</span>
+        
+        <h2 id="currentExerciseName" style="font-size: 1.5rem; margin-top: 15px; margin-bottom: 5px;">Przysiady</h2>
+        <p style="color: #7a8b99; font-weight: 700; margin-bottom: 15px;" id="currentSetText">Seria 1 z 3</p>
+
+        <!-- STOPER -->
+        <div id="timerContainer" style="display: none; margin: 15px 0;">
+            <p style="color: #e67e22; font-weight: 700; margin-bottom: 5px;">⏱️ Czas na przerwę!</p>
+            <div id="timerDisplay" style="font-size: 3rem; font-weight: 800; color: #2c3e50; font-family: monospace;">01:00</div>
         </div>
-        <div style="display: flex; gap: 8px;">
-            <button onclick="startTimer(30)" style="flex:1; padding: 8px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">30s</button>
-            <button onclick="startTimer(60)" style="flex:1; padding: 8px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">60s</button>
-            <button onclick="startTimer(90)" style="flex:1; padding: 8px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafc; font-weight: 600; cursor: pointer;">90s</button>
-        </div>
+
+        <button class="btn-action" id="mainActionButton" onclick="nextStep()">Zrób serię i odpocznij ✨</button>
+        <button class="btn-secondary" style="margin-top: 15px; width: 100%;" onclick="cancelWorkout()">Anuluj trening</button>
     </div>
 
-    <!-- WYBÓR GOTOWEGO PLANU -->
-    <div class="card">
-        <h2>🏋️ Wybierz Plan Treningu</h2>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button class="preset-btn active" id="btnNormal" onclick="selectPlan('normal')">⚡ Normalny</button>
-            <button class="preset-btn" id="btnLazy" onclick="selectPlan('lazy')">☁️ Na Lenia</button>
+    <!-- WYBÓR TRENINGU (POKAŻ GDY NIE MA AKTYWNEGO) -->
+    <div class="card" id="startWorkoutCard">
+        <h2>🚀 Wybierz i Zacznij Trening</h2>
+        <p style="font-size: 0.85rem; color: #7a8b99; margin-top: -10px; margin-bottom: 15px;">Kliknij raz – aplikacja sama przeprowadzi Cię przez całą sesję!</p>
+        
+        <div style="display: flex; gap: 10px; flex-direction: column;">
+            <button class="btn-start" onclick="startAutomatedWorkout('normal')">⚡ Włącz Trening Normalny</button>
+            <button class="btn-start btn-lazy" onclick="startAutomatedWorkout('lazy')">☁️ Włącz Trening Na Lenia</button>
+            <button class="btn-start" style="background: #34495e; box-shadow: none;" onclick="startAutomatedWorkout('custom')">🛠️ Włącz 3. Trening (Własny)</button>
         </div>
-
-        <!-- LISTA ĆWICZEŃ Z AUTOMATYCZNYMI SERIAMI -->
-        <div id="workoutExercises"></div>
     </div>
 
     <!-- KONFIGURATOR 3. TRENINGU (WŁASNEGO) -->
     <div class="card">
-        <h2>🛠️ Konfigurator 3. Treningu (Własny)</h2>
-        <p style="font-size: 0.8rem; color: #7a8b99; margin-top: -10px; margin-bottom: 12px;">Ułóż własny zestaw ćwiczeń, jeśli chcesz spróbować czegoś innego:</p>
+        <h2>🛠️ Konfigurator 3. Treningu</h2>
         <div style="display: flex; gap: 8px;">
             <input type="text" id="customExInput" placeholder="Nazwa ćwiczenia (np. Hip Thrust)" style="margin: 0;">
-            <button class="btn" onclick="addCustomExercise()">Dodaj</button>
+            <button class="btn-start" style="padding: 10px 15px; font-size: 0.9rem;" onclick="addCustomExercise()">Dodaj</button>
         </div>
-        <div id="customExercisesList" style="margin-top: 12px;"></div>
+        <div id="customList" style="margin-top: 12px;"></div>
     </div>
 
-    <!-- HISTORIA WSZYSTKICH TRENINGÓW -->
+    <!-- HISTORIA TRENINGÓW -->
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h2>📝 Historia Wszystkich Serii (<span id="totalSets">0</span>)</h2>
-            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="clearHistory()">Wyczyść</button>
+            <h2>📝 Historia Treningów (<span id="totalWorkoutCount">0</span>)</h2>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="clearHistory()">Wyczyść</button>
         </div>
         <div id="historyList"></div>
     </div>
 
     <script>
-        // Plany treningowe
+        // Baza ćwiczeń
         const plans = {
             normal: ["Przysiady", "Wykroki", "Pompki / Odwrotne pompki", "Glute Bridge", "Plank (Deska)"],
-            lazy: ["Glute Bridge leżąc", "Wznosy nóg w leżeniu", "Rozciąganie / Cat-Cow", "Plank 30 sekund"]
+            lazy: ["Glute Bridge leżąc", "Wznosy nóg w leżeniu", "Rozciąganie / Cat-Cow", "Plank 30sek"]
         };
 
-        let currentPlanKey = 'normal';
-        let customExercises = JSON.parse(localStorage.getItem('customWorkoutPlan')) || [];
-        let history = JSON.parse(localStorage.getItem('workoutHistoryLog')) || [];
-        let completedSetsTracker = JSON.parse(localStorage.getItem('completedSetsTracker')) || {};
+        let customPlan = JSON.parse(localStorage.getItem('customWorkoutPlanAuto')) || [];
+        let history = JSON.parse(localStorage.getItem('workoutAutoHistory')) || [];
 
+        // Stan automatycznego treningu
+        let activePlan = [];
+        let planName = '';
+        let currentExIndex = 0;
+        let currentSet = 1;
+        const maxSets = 3;
+        let isResting = false;
         let timerInterval = null;
         let timeLeft = 60;
 
-        function selectPlan(planKey) {
-            currentPlanKey = planKey;
-            document.getElementById('btnNormal').classList.toggle('active', planKey === 'normal');
-            document.getElementById('btnLazy').classList.toggle('active', planKey === 'lazy');
-            renderWorkout();
-        }
-
-        function renderWorkout() {
-            const container = document.getElementById('workoutExercises');
-            container.innerHTML = '';
-            
-            let exercises = plans[currentPlanKey];
-
-            exercises.forEach((ex, exIdx) => {
-                let setsHtml = '';
-                for (let s = 1; s <= 3; s++) {
-                    const setKey = `${currentPlanKey}_${exIdx}_${s}`;
-                    const isDone = completedSetsTracker[setKey] ? 'done' : '';
-                    setsHtml += `<button class="set-btn ${isDone}" onclick="logSet('${ex}', ${s}, '${setKey}')">Seria ${s}</button>`;
+        function startAutomatedWorkout(type) {
+            if (type === 'normal') {
+                activePlan = [...plans.normal];
+                planName = "⚡ Trening Normalny";
+            } else if (type === 'lazy') {
+                activePlan = [...plans.lazy];
+                planName = "☁️ Trening Na Lenia";
+            } else if (type === 'custom') {
+                if (customPlan.length === 0) {
+                    alert("Najpierw dodaj własne ćwiczenia w konfiguratorze poniżej!");
+                    return;
                 }
-
-                container.innerHTML += `
-                    <div class="ex-card">
-                        <div class="ex-title">${ex}</div>
-                        <div class="set-btn-group">${setsHtml}</div>
-                    </div>
-                `;
-            });
-        }
-
-        function logSet(exName, setNum, setKey) {
-            // Oznaczenie zestawu jako zaliczony
-            completedSetsTracker[setKey] = true;
-            localStorage.setItem('completedSetsTracker', JSON.stringify(completedSetsTracker));
-
-            // Zapis w historii
-            const timeStr = new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-            history.unshift({ name: exName, set: setNum, time: timeStr });
-            localStorage.setItem('workoutHistoryLog', JSON.stringify(history));
-
-            renderWorkout();
-            renderCustomExercises();
-            renderHistory();
-            startTimer(60); // Automatycznie odpala stoper
-        }
-
-        // KONFIGURATOR 3. TRENINGU
-        function addCustomExercise() {
-            const input = document.getElementById('customExInput');
-            if (input.value.trim() !== '') {
-                customExercises.push(input.value.trim());
-                localStorage.setItem('customWorkoutPlan', JSON.stringify(customExercises));
-                input.value = '';
-                renderCustomExercises();
+                activePlan = [...customPlan];
+                planName = "🛠️ Trening Własny";
             }
+
+            currentExIndex = 0;
+            currentSet = 1;
+            isResting = false;
+
+            document.getElementById('startWorkoutCard').style.display = 'none';
+            document.getElementById('activeWorkoutCard').style.display = 'block';
+            document.getElementById('workoutTypeBadge').textContent = planName;
+
+            updateWorkoutUI();
         }
 
-        function removeCustomEx(index) {
-            customExercises.splice(index, 1);
-            localStorage.setItem('customWorkoutPlan', JSON.stringify(customExercises));
-            renderCustomExercises();
-        }
-
-        function renderCustomExercises() {
-            const container = document.getElementById('customExercisesList');
-            container.innerHTML = '';
-
-            if (customExercises.length === 0) {
-                container.innerHTML = '<p style="color:#a0b2bc; font-size:0.8rem; text-align:center;">Brak własnych ćwiczeń. Dodaj pierwsze powyżej! ☁️</p>';
+        function updateWorkoutUI() {
+            if (currentExIndex >= activePlan.length) {
+                // Trening zakończony!
+                finishWorkout();
                 return;
             }
 
-            customExercises.forEach((ex, exIdx) => {
-                let setsHtml = '';
-                for (let s = 1; s <= 3; s++) {
-                    const setKey = `custom_${exIdx}_${s}`;
-                    const isDone = completedSetsTracker[setKey] ? 'done' : '';
-                    setsHtml += `<button class="set-btn ${isDone}" onclick="logSet('${ex}', ${s}, '${setKey}')">Seria ${s}</button>`;
-                }
+            const currentEx = activePlan[currentExIndex];
+            document.getElementById('currentExerciseName').textContent = currentEx;
+            document.getElementById('currentSetText').textContent = `Seria ${currentSet} z ${maxSets}`;
 
+            if (isResting) {
+                document.getElementById('timerContainer').style.display = 'block';
+                document.getElementById('mainActionButton').textContent = "Pomiń przerwę ⏩";
+                document.getElementById('mainActionButton').style.background = "#e67e22";
+            } else {
+                document.getElementById('timerContainer').style.display = 'none';
+                document.getElementById('mainActionButton').textContent = "Zalicz serię i odpocznij ✨";
+                document.getElementById('mainActionButton').style.background = "#2ecc71";
+            }
+        }
+
+        function nextStep() {
+            if (isResting) {
+                // Skracamy przerwę i przechodzimy do kolejnej serii/ćwiczenia
+                clearInterval(timerInterval);
+                isResting = false;
+                moveToNextSet();
+            } else {
+                // Zaliczenie serii i start przerwy
+                isResting = true;
+                startRestTimer(60);
+            }
+            updateWorkoutUI();
+        }
+
+        function moveToNextSet() {
+            if (currentSet < maxSets) {
+                currentSet++;
+            } else {
+                currentSet = 1;
+                currentExIndex++;
+            }
+            updateWorkoutUI();
+        }
+
+        function startRestTimer(seconds) {
+            timeLeft = seconds;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isResting = false;
+                    moveToNextSet();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const seconds = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
+        }
+
+        function finishWorkout() {
+            clearInterval(timerInterval);
+            document.getElementById('activeWorkoutCard').style.display = 'none';
+            document.getElementById('startWorkoutCard').style.display = 'block';
+
+            const dateStr = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            history.unshift({ type: planName, date: dateStr });
+            localStorage.setItem('workoutAutoHistory', JSON.stringify(history));
+
+            renderHistory();
+            alert("Brawo, Gwiazdo! Trening ukończony! 🎉💪");
+        }
+
+        function cancelWorkout() {
+            if (confirm("Na pewno chcesz anulować trening?")) {
+                clearInterval(timerInterval);
+                document.getElementById('activeWorkoutCard').style.display = 'none';
+                document.getElementById('startWorkoutCard').style.display = 'block';
+            }
+        }
+
+        // KONFIGURATOR WŁASNEGO TRENINGU
+        function addCustomExercise() {
+            const input = document.getElementById('customExInput');
+            if (input.value.trim() !== '') {
+                customPlan.push(input.value.trim());
+                localStorage.setItem('customWorkoutPlanAuto', JSON.stringify(customPlan));
+                input.value = '';
+                renderCustomList();
+            }
+        }
+
+        function removeCustom(index) {
+            customPlan.splice(index, 1);
+            localStorage.setItem('customWorkoutPlanAuto', JSON.stringify(customPlan));
+            renderCustomList();
+        }
+
+        function renderCustomList() {
+            const container = document.getElementById('customList');
+            container.innerHTML = '';
+            if (customPlan.length === 0) {
+                container.innerHTML = '<p style="color:#a0b2bc; font-size:0.8rem; text-align:center;">Brak własnych ćwiczeń ☁️</p>';
+                return;
+            }
+            customPlan.forEach((ex, idx) => {
                 container.innerHTML += `
-                    <div class="ex-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div class="ex-title">${ex}</div>
-                            <button onclick="removeCustomEx(${exIdx})" style="background:none; border:none; cursor:pointer;">🗑️</button>
-                        </div>
-                        <div class="set-btn-group">${setsHtml}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; margin-bottom:6px; border:1px solid #edf2f7;">
+                        <span style="font-weight:600; font-size:0.9rem;">${ex}</span>
+                        <button onclick="removeCustom(${idx})" style="background:none; border:none; cursor:pointer;">🗑️</button>
                     </div>
                 `;
             });
@@ -310,65 +358,34 @@
         // HISTORIA
         function renderHistory() {
             const container = document.getElementById('historyList');
-            document.getElementById('totalSets').textContent = history.length;
+            document.getElementById('totalWorkoutCount').textContent = history.length;
             container.innerHTML = '';
 
             if (history.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.85rem; padding:10px;">Brak historii treningów ☁️</p>';
+                container.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.85rem; padding:10px;">Brak ukończonych treningów ☁️</p>';
                 return;
             }
 
             history.forEach(item => {
                 container.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#fafcfe; border-radius:10px; margin-bottom:6px; border:1px solid #edf4f8;">
-                        <span style="font-weight:700; color:#4a90e2; font-size:0.85rem;">${item.name} — Seria ${item.set}</span>
-                        <span style="font-size:0.75rem; color:#a0b2bc;">${item.time}</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#fafcfe; border-radius:10px; margin-bottom:6px; border:1px solid #edf4f8;">
+                        <span style="font-weight:700; color:#4a90e2; font-size:0.85rem;">${item.type}</span>
+                        <span style="font-size:0.75rem; color:#a0b2bc;">${item.date}</span>
                     </div>
                 `;
             });
         }
 
         function clearHistory() {
-            if (confirm("Chcesz wyczyścić historię i zresetować oznaczone serie?")) {
+            if (confirm("Chcesz wyczyścić historię ukończonych treningów?")) {
                 history = [];
-                completedSetsTracker = {};
-                localStorage.removeItem('workoutHistoryLog');
-                localStorage.removeItem('completedSetsTracker');
-                renderWorkout();
-                renderCustomExercises();
+                localStorage.removeItem('workoutAutoHistory');
                 renderHistory();
             }
         }
 
-        // STOPER
-        function updateDisplay() {
-            const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            const seconds = (timeLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
-        }
-
-        function startTimer(seconds) {
-            clearInterval(timerInterval);
-            timeLeft = seconds;
-            updateDisplay();
-
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateDisplay();
-
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    document.getElementById('timerDisplay').textContent = "00:00";
-                    alert("Koniec przerwy! Czas na kolejną serię 💪");
-                }
-            }, 1000);
-        }
-
-        // START
-        renderWorkout();
-        renderCustomExercises();
+        renderCustomList();
         renderHistory();
-        updateDisplay();
     </script>
 </body>
 </html>
