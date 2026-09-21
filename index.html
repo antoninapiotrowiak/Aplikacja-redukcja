@@ -170,14 +170,13 @@
     </div>
 
     <!-- NAWIGACJA -->
-        <nav class="top-nav" style="display: flex; justify-content: space-around; gap: 4px; overflow-x: auto;">
+    <nav class="top-nav" style="display: flex; justify-content: space-around; gap: 4px; overflow-x: auto;">
         <a href="index.html" class="nav-link active">🏠 Główna</a>
         <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
         <a href="trening.html" class="nav-link">⏱️ Trening</a>
         <a href="statystyki.html" class="nav-link">📊 Staty</a>
         <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
     </nav>
-
 
     <!-- KARTA POWIADOMIEŃ AUTOMATYCZNYCH -->
     <div class="card">
@@ -240,7 +239,6 @@
 
     <!-- SKRYPT INTERFEJSU I AUTOMATYZACJI -->
     <script>
-        // Sprawdzanie i czyszczenie wczorajszych flag powiadomień
         function checkDayReset() {
             const todayStr = new Date().toISOString().split('T')[0];
             const lastActiveDay = localStorage.getItem('lastActiveDay');
@@ -255,7 +253,6 @@
         }
         checkDayReset();
 
-        // Tryb ciemny
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
@@ -266,7 +263,6 @@
             document.body.classList.add('dark-mode');
         }
 
-        // Nastrojometr
         function saveMood(emoji, label) {
             const todayStr = new Date().toISOString().split('T')[0];
             const moodData = { emoji, label, date: todayStr };
@@ -476,8 +472,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { 
             getAuth, 
-            signInWithRedirect, 
-            getRedirectResult,
+            signInWithPopup, 
             GoogleAuthProvider, 
             signOut, 
             onAuthStateChanged 
@@ -510,13 +505,9 @@
 
         let unsubscribeSnapshot = null;
 
-        getRedirectResult(auth).catch((error) => {
-            console.error("Błąd po przekierowaniu:", error);
-        });
-
         window.zalogujZGoogle = async function() {
             try {
-                await signInWithRedirect(auth, provider);
+                await signInWithPopup(auth, provider);
             } catch (error) {
                 console.error("Błąd logowania:", error);
                 alert("Nie udało się zalogować: " + error.message);
