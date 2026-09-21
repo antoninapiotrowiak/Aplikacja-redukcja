@@ -195,19 +195,31 @@
         <a href="./przepisy.html" class="nav-link active">🥗 Przepisy</a>
     </nav>
 
-    <!-- KALKULATOR KALORII -->
+        <!-- KALKULATOR SKŁADNIKÓW I KALORII -->
     <div class="card">
-        <h2>🧮 Szybki Kalkulator Kalorii Produktu</h2>
+        <h2>🧮 Kalkulator Kalorii Składników</h2>
         <div class="form-group">
-            <label for="calcKcal100">Kalorie w 100g produktu</label>
-            <input type="number" id="calcKcal100" placeholder="np. 150">
+            <label for="ingName">Nazwa składnika / produktu</label>
+            <input type="text" id="ingName" placeholder="np. Kurczak, Ryż">
         </div>
         <div class="form-group">
-            <label for="calcWeight">Waga porcji (w gramach)</label>
-            <input type="number" id="calcWeight" placeholder="np. 250">
+            <label for="ingKcal100">Kalorie w 100g (lub ml)</label>
+            <input type="number" id="ingKcal100" placeholder="np. 165">
         </div>
-        <button class="action-btn" onclick="calculateCalories()">Oblicz kalorie</button>
-        <div id="calcResult" style="margin-top: 12px; font-weight: 700; text-align: center; color: var(--primary);"></div>
+        <div class="form-group">
+            <label for="ingWeight">Waga / Ilość (w gramach lub ml)</label>
+            <input type="number" id="ingWeight" placeholder="np. 200">
+        </div>
+        <button class="action-btn" onclick="addIngredientToCalc()">Dodaj składnik</button>
+
+        <!-- Lista dodanych składników -->
+        <div id="calcIngredientsList" style="margin-top: 15px; font-size: 0.85rem;">
+            <div style="color: #7a8b99; text-align: center;">Brak składników w kalkulatorze.</div>
+        </div>
+
+        <div id="calcTotalResult" style="margin-top: 15px; font-weight: 700; text-align: right; font-size: 1rem; color: var(--primary);">
+            Łącznie: 0 kcal
+        </div>
     </div>
 
     <!-- BAZA PRZEPISÓW -->
@@ -342,6 +354,69 @@
         }
 
         renderRecipesList();
+                // --- KALKULATOR SKŁADNIKÓW ---
+        let calcIngredients = [];
+
+        function addIngredientToCalc() {
+            const name = document.getElementById('ingName').value.trim();
+            const kcal100 = parseFloat(document.getElementById('ingKcal100').value);
+            const weight = parseFloat(document.getElementById('ingWeight').value);
+
+            if (!name || isNaN(kcal100) || isNaN(weight)) {
+                alert('Wypełnij poprawnie wszystkie pola składnika!');
+                return;
+            }
+
+            // Oblicz kalorie dla danej wagi
+            const totalKcal = (kcal100 * weight) / 100;
+
+            calcIngredients.push({
+                id: Date.now(),
+                name: name,
+                weight: weight,
+                kcal: totalKcal
+            });
+
+            // Wyczyść pola
+            document.getElementById('ingName').value = '';
+            document.getElementById('ingKcal100').value = '';
+            document.getElementById('ingWeight').value = '';
+
+            renderCalcIngredients();
+        }
+
+        function removeCalcIngredient(id) {
+            calcIngredients = calcIngredients.filter(item => item.id !== id);
+            renderCalcIngredients();
+        }
+
+        function renderCalcIngredients() {
+            const listEl = document.getElementById('calcIngredientsList');
+            const totalEl = document.getElementById('calcTotalResult');
+
+            if (calcIngredients.length === 0) {
+                listEl.innerHTML = '<div style="color: #7a8b99; text-align: center;">Brak składników w kalkulatorze.</div>';
+                totalEl.innerHTML = 'Łącznie: 0 kcal';
+                return;
+            }
+
+            let html = '';
+            let grandTotal = 0;
+
+            calcIngredients.forEach(item => {
+                grandTotal += item.kcal;
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--primary-light); padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; border: 1px solid var(--border);">
+                        <div><b>${item.name}</b> (${item.weight}g)</div>
+                        <div><b>${item.kcal.toFixed(0)} kcal</b> <button onclick="removeCalcIngredient(${item.id})" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-left:8px;" title="Usuń">✕</button></div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html;
+            totalEl.innerHTML = `Łącznie: ${grandTotal.toFixed(0)} kcal`;
+        }
+
     </script>
 </body>
 </html>
