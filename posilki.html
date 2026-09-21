@@ -14,7 +14,18 @@
             --text: #2c3e50;
             --bg: #f4f7f9;
             --card-bg: #ffffff;
-            --danger: #e74c3c;
+            --accent: #2ecc71;
+            --border: #e1e8ed;
+        }
+
+        body.dark-mode {
+            --primary: #5c9ded;
+            --primary-light: #1e293b;
+            --text: #f1f5f9;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #34d399;
+            --border: #334155;
         }
 
         body {
@@ -24,6 +35,7 @@
             padding: 15px;
             max-width: 500px;
             margin: 0 auto;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .user-bar {
@@ -37,22 +49,11 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.04);
         }
 
-        .btn-google {
-            background: #4285F4;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
         .top-nav {
             display: flex;
             justify-content: space-around;
             background: var(--card-bg);
-            padding: 12px;
+            padding: 10px;
             border-radius: 16px;
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.04);
@@ -62,8 +63,8 @@
             text-decoration: none;
             color: #7a8b99;
             font-weight: 700;
-            font-size: 0.85rem;
-            padding: 8px 10px;
+            font-size: 0.8rem;
+            padding: 6px 8px;
             border-radius: 10px;
             transition: all 0.2s ease;
         }
@@ -91,35 +92,23 @@
         input, select {
             width: 100%;
             padding: 10px;
-            border: 1px solid #e1e8ed;
-            border-radius: 10px;
-            box-sizing: border-box;
             margin-bottom: 10px;
-            font-size: 0.9rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            box-sizing: border-box;
         }
 
-        .btn-main {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
+        button.btn-main {
             background: var(--primary);
             color: white;
-            font-weight: 800;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .meal-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border: none;
             padding: 10px;
-            background: #f8fafc;
             border-radius: 10px;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            border: 1px solid #edf2f7;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
         }
     </style>
 </head>
@@ -127,14 +116,12 @@
 
     <!-- PASEK UŻYTKOWNIKA -->
     <div class="user-bar">
-        <div id="userInfo" style="font-weight: 700; font-size: 0.85rem; color: var(--text);">
-            🔒 Niezalogowano
-        </div>
-        <button id="authBtn" class="btn-google" onclick="handleAuth()">Zaloguj z Google</button>
+        <div style="font-weight: 700; font-size: 0.85rem;">🍽️ Rejestr Posiłków</div>
+        <button onclick="toggleDarkMode()" style="background:none; border:none; cursor:pointer; font-size:1.1rem;" title="Przełącz motyw">🌙</button>
     </div>
 
     <!-- NAWIGACJA -->
-         <nav class="top-nav" style="display: flex; justify-content: space-around; gap: 4px; overflow-x: auto;">
+    <nav class="top-nav">
         <a href="index.html" class="nav-link">🏠 Główna</a>
         <a href="posilki.html" class="nav-link active">🍽️ Posiłki</a>
         <a href="trening.html" class="nav-link">⏱️ Trening</a>
@@ -142,246 +129,68 @@
         <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
     </nav>
 
-
-
-    <!-- DODAWANIE POSIŁKU -->
+    <!-- SEKCJ POSIŁKÓW -->
     <div class="card">
-        <h2>➕ Dodaj Posiłek</h2>
-        
-        <select id="mealType">
-            <option value="sniadanie">🥣 Śniadanie</option>
-            <option value="obiad">🍲 Obiad</option>
-            <option value="kolacja">🥗 Kolacja</option>
-            <option value="przekaska">🍎 Przekąska</option>
-        </select>
-
+        <h2>Dodaj Posiłek</h2>
         <input type="text" id="mealName" placeholder="Nazwa posiłku (np. Owsianka)">
         <input type="number" id="mealKcal" placeholder="Kalorie (kcal)">
-
-        <button class="btn-main" onclick="addMeal()">💾 Zapisz posiłek</button>
+        <button class="btn-main" onclick="addMeal()">Dodaj do bilansu</button>
     </div>
 
-    <!-- LISTA DZISIEJSZYCH POSIŁKÓW -->
     <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h2>📋 Dzisiejsze posiłki</h2>
-            <strong style="color: var(--primary); font-size: 1rem;" id="totalKcalLabel">0 kcal</strong>
+        <h2>Dzisiejsze Posiłki</h2>
+        <div id="mealsList" style="font-size: 0.85rem; color: #7a8b99;">
+            Brak zapisanego jedzenia na dziś.
         </div>
-
-        <div id="mealsList"></div>
     </div>
 
     <script>
-        function handleAuth() {
-            if (window.currentUser) {
-                if (typeof window.wylogujZGoogle === "function") window.wylogujZGoogle();
-            } else {
-                if (typeof window.zalogujZGoogle === "function") window.zalogujZGoogle();
-            }
+        // Tryb ciemny - synchronizowany z resztą aplikacji
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
         }
 
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Prosta obsługa dodawania posiłków
         function addMeal() {
-            if (!window.currentUser) {
-                alert("Zaloguj się przez Google, aby dodawać posiłki!");
-                return;
-            }
+            const name = document.getElementById('mealName').value;
+            const kcal = document.getElementById('mealKcal').value;
+            if(!name || !kcal) return alert('Wpisz nazwę i kalorie!');
 
-            const mealType = document.getElementById('mealType').value;
-            const name = document.getElementById('mealName').value.trim();
-            const kcal = parseInt(document.getElementById('mealKcal').value);
-
-            if (!name || isNaN(kcal) || kcal <= 0) {
-                alert("Wpisz poprawną nazwę i kalorie!");
-                return;
-            }
-
-            // Oznaczamy posiłek jako zrobiony dla automatycznych przypomnień
             const todayStr = new Date().toISOString().split('T')[0];
-            if (mealType === 'sniadanie') {
-                localStorage.setItem(`breakfast_${todayStr}`, 'true');
-            } else if (mealType === 'obiad') {
-                localStorage.setItem(`lunch_${todayStr}`, 'true');
-            } else if (mealType === 'kolacja') {
-                localStorage.setItem(`dinner_${todayStr}`, 'true');
-            }
-
-            if (typeof window.zapiszPosilekDoFirebase === "function") {
-                window.zapiszPosilekDoFirebase(mealType, name, kcal);
-            }
+            let meals = JSON.parse(localStorage.getItem(`meals_${todayStr}`) || '[]');
+            meals.push({name, kcal: parseInt(kcal)});
+            localStorage.setItem(`meals_${todayStr}`, JSON.stringify(meals));
 
             document.getElementById('mealName').value = '';
             document.getElementById('mealKcal').value = '';
+            loadMeals();
         }
 
-        function renderMeals(meals = []) {
-            const container = document.getElementById('mealsList');
-            const totalLabel = document.getElementById('totalKcalLabel');
-            if (!container) return;
-
-            container.innerHTML = '';
-            let total = 0;
-
-            if (!meals || meals.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.8rem;">Brak zapisanych posiłków na dziś 🍽️</p>';
-                if (totalLabel) totalLabel.textContent = '0 kcal';
-                localStorage.setItem('todayCalories', 0);
+        function loadMeals() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            let meals = JSON.parse(localStorage.getItem(`meals_${todayStr}`) || '[]');
+            const listEl = document.getElementById('mealsList');
+            
+            if(meals.length === 0) {
+                listEl.innerHTML = 'Brak zapisanego jedzenia na dziś.';
                 return;
             }
 
-            const icons = {
-                sniadanie: '🥣',
-                obiad: '🍲',
-                kolacja: '🥗',
-                przekaska: '🍎'
-            };
-
-            meals.forEach((m) => {
-                total += parseInt(m.kcal) || 0;
-                container.innerHTML += `
-                    <div class="meal-row">
-                        <div>
-                            <strong>${icons[m.type] || '🍽️'} ${m.name}</strong>
-                            <div style="font-size:0.75rem; color:#7a8b99;">${m.kcal} kcal</div>
-                        </div>
-                        <button onclick="deleteMeal('${m.id}')" style="background:none; border:none; cursor:pointer;">🗑️</button>
-                    </div>
-                `;
+            let html = '<ul style="padding-left: 20px; margin: 0;">';
+            meals.forEach(m => {
+                html += `<li><b>${m.name}</b>: ${m.kcal} kcal</li>`;
             });
-
-            if (totalLabel) totalLabel.textContent = total + ' kcal';
-            localStorage.setItem('todayCalories', total);
+            html += '</ul>';
+            listEl.innerHTML = html;
         }
 
-        function deleteMeal(id) {
-            if (typeof window.usunPosilekZFirebase === "function") {
-                window.usunPosilekZFirebase(id);
-            }
-        }
-    </script>
-
-    <!-- FIREBASE MODULE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-        import { 
-            getAuth, 
-            signInWithRedirect, 
-            getRedirectResult,
-            GoogleAuthProvider, 
-            signOut, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            addDoc, 
-            onSnapshot, 
-            deleteDoc, 
-            doc,
-            query,
-            where
-        } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAlD9a5WqfBIYWLh4okyGSI8AY1obeox50",
-            authDomain: "mojaaplikacja-6bfaa.firebaseapp.com",
-            projectId: "mojaaplikacja-6bfaa",
-            storageBucket: "mojaaplikacja-6bfaa.firebasestorage.app",
-            messagingSenderId: "586745068789",
-            appId: "1:024245da595f9a11b299bc",
-            measurementId: "G-M0K7DTZRN1"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-
-        let unsubscribeSnapshot = null;
-
-        getRedirectResult(auth).catch((error) => {
-            console.error("Błąd po przekierowaniu:", error);
-        });
-
-        window.zalogujZGoogle = async function() {
-            try {
-                await signInWithRedirect(auth, provider);
-            } catch (error) {
-                console.error("Błąd logowania:", error);
-                alert("Nie udało się zalogować: " + error.message);
-            }
-        };
-
-        window.wylogujZGoogle = async function() {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Błąd wylogowania:", error);
-            }
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            const userInfo = document.getElementById('userInfo');
-            const authBtn = document.getElementById('authBtn');
-
-            if (user) {
-                window.currentUser = user;
-                userInfo.innerHTML = `👤 ${user.displayName || 'Zalogowano'}`;
-                authBtn.textContent = 'Wyloguj';
-                authBtn.style.background = '#e74c3c';
-
-                const todayStr = new Date().toLocaleDateString('pl-PL');
-                const q = query(
-                    collection(db, "posilki"), 
-                    where("userId", "==", user.uid),
-                    where("date", "==", todayStr)
-                );
-                
-                if (unsubscribeSnapshot) unsubscribeSnapshot();
-                
-                unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
-                    let meals = [];
-                    snapshot.forEach((doc) => {
-                        meals.push({ id: doc.id, ...doc.data() });
-                    });
-                    renderMeals(meals);
-                });
-
-            } else {
-                window.currentUser = null;
-                userInfo.innerHTML = '🔒 Niezalogowano';
-                authBtn.textContent = 'Zaloguj z Google';
-                authBtn.style.background = '#4285F4';
-
-                if (unsubscribeSnapshot) unsubscribeSnapshot();
-                renderMeals([]);
-            }
-        });
-
-        window.zapiszPosilekDoFirebase = async function(type, name, kcal) {
-            if (!window.currentUser) return;
-
-            try {
-                const todayStr = new Date().toLocaleDateString('pl-PL');
-                await addDoc(collection(db, "posilki"), {
-                    userId: window.currentUser.uid,
-                    date: todayStr,
-                    type: type,
-                    name: name,
-                    kcal: kcal,
-                    created: new Date().getTime()
-                });
-            } catch (e) {
-                console.error("Błąd zapisu posiłku:", e);
-            }
-        };
-
-        window.usunPosilekZFirebase = async function(id) {
-            try {
-                await deleteDoc(doc(db, "posilki", id));
-            } catch (e) {
-                console.error("Błąd usuwania posiłku:", e);
-            }
-        };
+        loadMeals();
     </script>
 </body>
 </html>
