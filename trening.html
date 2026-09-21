@@ -138,7 +138,7 @@
             margin-bottom: 5px;
         }
 
-        input, select {
+        input {
             width: 100%;
             padding: 10px;
             border-radius: 10px;
@@ -159,6 +159,12 @@
             margin-bottom: 8px;
             border: 1px solid var(--border);
             font-size: 0.85rem;
+        }
+
+        .preset-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -189,9 +195,19 @@
         </div>
     </div>
 
+    <!-- GOTOWE TRENINGI (SZYBKI WYBÓR) -->
+    <div class="card">
+        <h2>⚡ Gotowe Zestawy</h2>
+        <div style="font-size: 0.8rem; color: #7a8b99; margin-bottom: 10px;">Wybierz gotowy plan jednym kliknięciem:</div>
+        <div class="preset-container">
+            <button class="action-btn" style="flex: 1; background: var(--accent); font-size:0.8rem;" onclick="loadPreset('normal')">🔥 Normalny (Spalanie)</button>
+            <button class="action-btn" style="flex: 1; background: #e67e22; font-size:0.8rem;" onclick="loadPreset('lazy')">💤 Lekki & Brzuch</button>
+        </div>
+    </div>
+
     <!-- KONFIGURATOR WŁASNEGO TRENINGU -->
     <div class="card">
-        <h2>🛠️ Konfigurator Własnego Treningu</h2>
+        <h2>🛠️ Twój Plan Treningowy</h2>
         <div class="form-group">
             <label for="exName">Nazwa ćwiczenia</label>
             <input type="text" id="exName" placeholder="np. Przysiady z wyskokiem">
@@ -202,9 +218,9 @@
         </div>
         <button class="action-btn" style="width: 100%; margin-bottom: 15px;" onclick="addExercise()">Dodaj do planu</button>
 
-        <h3 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--text);">Twoje ćwiczenia w planie:</h3>
+        <h3 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--text);">Ćwiczenia w planie:</h3>
         <div id="customWorkoutList">
-            <div style="font-size: 0.85rem; color: #7a8b99; text-align: center; padding: 10px;">Brak ćwiczeń w spersonalizowanym planie.</div>
+            <div style="font-size: 0.85rem; color: #7a8b99; text-align: center; padding: 10px;">Brak ćwiczeń w planie.</div>
         </div>
     </div>
 
@@ -253,6 +269,7 @@
             btn.classList.remove('danger-btn');
         }
 
+        let stopwatchSeconds_display = 0;
         function updateStopwatchDisplay() {
             const hrs = String(Math.floor(stopwatchSeconds / 3600)).padStart(2, '0');
             const mins = String(Math.floor((stopwatchSeconds % 3600) / 60)).padStart(2, '0');
@@ -260,13 +277,13 @@
             document.getElementById('stopwatchDisplay').textContent = `${hrs}:${mins}:${secs}`;
         }
 
-        // --- KONFIGURATOR TRENINGU LOGIKA ---
+        // --- KONFIGURATOR I PRESETY TRENINGOWE ---
         let customExercises = JSON.parse(localStorage.getItem('customWorkoutExercises')) || [];
 
         function renderExercises() {
             const listContainer = document.getElementById('customWorkoutList');
             if (customExercises.length === 0) {
-                listContainer.innerHTML = '<div style="font-size: 0.85rem; color: #7a8b99; text-align: center; padding: 10px;">Brak ćwiczeń w spersonalizowanym planie.</div>';
+                listContainer.innerHTML = '<div style="font-size: 0.85rem; color: #7a8b99; text-align: center; padding: 10px;">Brak ćwiczeń w planie.</div>';
                 return;
             }
 
@@ -306,6 +323,28 @@
 
         function removeExercise(index) {
             customExercises.splice(index, 1);
+            localStorage.setItem('customWorkoutExercises', JSON.stringify(customExercises));
+            renderExercises();
+        }
+
+        // Ładowanie domyślnych zestawów
+        function loadPreset(type) {
+            if (type === 'normal') {
+                customExercises = [
+                    { name: "Pajacyki (Rozgrzewka / Spalanie)", reps: "45 sekund" },
+                    { name: "Przysiady z wyskokiem", reps: "15 powtórzeń" },
+                    { name: "Mountain Climbers (Górskie wspinaczki)", reps: "40 sekund" },
+                    { name: "Wykroki w miejscu", reps: "20 powtórzeń na nogę" },
+                    { name: "Plank klasyczny (Deska)", reps: "45 sekund" }
+                ];
+            } else if (type === 'lazy') {
+                customExercises = [
+                    { name: "Szybki Plank (Deska)", reps: "30 sekund" },
+                    { name: "Brzuszki klasyczne", reps: "15 powtórzeń" },
+                    { name: "Rowerek leżąc", reps: "30 sekund" },
+                    { name: "Unoszenie nóg leżąc", reps: "12 powtórzeń" }
+                ];
+            }
             localStorage.setItem('customWorkoutExercises', JSON.stringify(customExercises));
             renderExercises();
         }
