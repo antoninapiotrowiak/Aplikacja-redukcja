@@ -28,6 +28,12 @@
             --border: #334155;
         }
 
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+            background: #0f172a;
+            color: #f1f5f9;
+            border-color: var(--border);
+        }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background: var(--bg);
@@ -89,12 +95,53 @@
             color: var(--text);
         }
 
-        .recipe-box {
-            background: var(--primary-light);
-            padding: 15px;
-            border-radius: 14px;
-            margin-bottom: 12px;
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
             border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 70px;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .recipe-item {
+            padding: 12px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .recipe-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .recipe-meta {
+            font-size: 0.75rem;
+            color: #7a8b99;
+            margin-bottom: 6px;
         }
     </style>
 </head>
@@ -102,14 +149,12 @@
 
     <!-- PASEK UŻYTKOWNIKA -->
     <div class="user-bar">
-        <div id="userInfo" style="font-weight: 700; font-size: 0.85rem; color: var(--text);">
-            🥗 Kącik Przepisów
-        </div>
+        <div style="font-weight: 700; font-size: 0.85rem;">🥗 Baza i Konfigurator Przepisów</div>
         <button onclick="toggleDarkMode()" style="background:none; border:none; cursor:pointer; font-size:1.1rem;" title="Przełącz motyw">🌙</button>
     </div>
 
-    <!-- NOWA NAWIGACJA Z PRZEPISAMI -->
-       <nav class="top-nav" style="display: flex; justify-content: space-around; gap: 4px; overflow-x: auto;">
+    <!-- NAWIGACJA -->
+    <nav class="top-nav">
         <a href="index.html" class="nav-link">🏠 Główna</a>
         <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
         <a href="trening.html" class="nav-link">⏱️ Trening</a>
@@ -117,23 +162,32 @@
         <a href="przepisy.html" class="nav-link active">🥗 Przepisy</a>
     </nav>
 
+    <!-- KONFIGURATOR / DODAWANIE PRZEPISU -->
+    <div class="card">
+        <h2>➕ Dodaj Własny Przepis</h2>
+        <input type="text" id="recipeName" placeholder="Nazwa przepisu (np. Owsianka bananowa)">
+        <select id="recipeCategory">
+            <option value="Śniadania">Śniadania / Na słodko</option>
+            <option value="Airfryer">Airfryer / Szybkie</option>
+            <option value="Obiady">Obiady / Główne</option>
+            <option value="Przekąski">Przekąski</option>
+        </select>
+        <input type="number" id="recipeKcal" placeholder="Szacowane kalorie (kcal)">
+        <textarea id="recipeDesc" placeholder="Krótki opis lub składniki..."></textarea>
+        <button class="btn-main" onclick="addRecipe()">Zapisz przepis</button>
+    </div>
+
+    <!-- WYSZUKIWARKA -->
+    <div class="card">
+        <h2>🔍 Szukaj w przepisach</h2>
+        <input type="text" id="searchInput" placeholder="Wpisz szukaną frazę..." onkeyup="filterRecipes()">
+    </div>
 
     <!-- LISTA PRZEPISÓW -->
     <div class="card">
-        <h2>✨ Szybkie Przepisy (Airfryer / Fit)</h2>
-        
-        <div class="recipe-box">
-            <h3 style="margin:0 0 8px 0; font-size:0.95rem; color:var(--primary);">🍫 Czekoladowe ciacho z airfryera</h3>
-            <p style="margin:0; font-size:0.85rem; color:var(--text); line-height:1.4;">
-                Szybka porcja słodkości na szybko. Wymieszaj składniki, wrzuć do foremki i upiecz w airfryerze. Bez zbędnego czekania!
-            </p>
-        </div>
-
-        <div class="recipe-box">
-            <h3 style="margin:0 0 8px 0; font-size:0.95rem; color:var(--primary);">🥞 Owsiane muffinki</h3>
-            <p style="margin:0; font-size:0.85rem; color:var(--text); line-height:1.4;">
-                Idealne na drugie śniadanie lub szybką przekąskę do szkoły.
-            </p>
+        <h2>📋 Twoje Przepisy i Inspiracje</h2>
+        <div id="recipesContainer">
+            <!-- Tutaj wskakują przepisy -->
         </div>
     </div>
 
@@ -148,6 +202,79 @@
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.body.classList.add('dark-mode');
         }
+
+        // Baza przepisów w localStorage
+        let recipes = JSON.parse(localStorage.getItem('userRecipes')) || [
+            { id: 1, name: "Czekoladowe ciastko z airfryera", category: "Airfryer", kcal: 250, desc: "Szybka porcja słodkości w 10 minut. Wymieszaj i do airfryera!" },
+            { id: 2, name: "Pieczona owsianka z owocami", category: "Śniadania", kcal: 320, desc: "Ciepłe, sycące śniadanie na dobry początek dnia." },
+            { id: 3, name: "Chrupiący Camembert z warzywami", category: "Przekąski", kcal: 380, desc: "Rozgrzany serek na ciepło z ulubionymi dodatkami." }
+        ];
+
+        function addRecipe() {
+            const name = document.getElementById('recipeName').value;
+            const category = document.getElementById('recipeCategory').value;
+            const kcal = parseInt(document.getElementById('recipeKcal').value);
+            const desc = document.getElementById('recipeDesc').value;
+
+            if (!name || isNaN(kcal)) {
+                alert("Podaj przynajmniej nazwę i kalorie!");
+                return;
+            }
+
+            const newRecipe = { id: Date.now(), name, category, kcal, desc };
+            recipes.unshift(newRecipe);
+            localStorage.setItem('userRecipes', JSON.stringify(recipes));
+
+            document.getElementById('recipeName').value = '';
+            document.getElementById('recipeKcal').value = '';
+            document.getElementById('recipeDesc').value = '';
+            renderRecipes();
+        }
+
+        function deleteRecipe(id) {
+            recipes = recipes.filter(r => r.id !== id);
+            localStorage.setItem('userRecipes', JSON.stringify(recipes));
+            renderRecipes();
+        }
+
+        function renderRecipes() {
+            const container = document.getElementById('recipesContainer');
+            container.innerHTML = '';
+
+            if (recipes.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#7a8b99; font-size:0.85rem;">Brak zapisanych przepisów.</p>';
+                return;
+            }
+
+            recipes.forEach(r => {
+                container.innerHTML += `
+                    <div class="recipe-item" data-search="${r.name.toLowerCase()} ${r.category.toLowerCase()} ${r.desc.toLowerCase()}">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div class="recipe-title">${r.name}</div>
+                            <button onclick="deleteRecipe(${r.id})" style="background:none; border:none; cursor:pointer; font-size:0.9rem;" title="Usuń">🗑️</button>
+                        </div>
+                        <div class="recipe-meta">Kategoria: <b>${r.category}</b> | ⚡ ${r.kcal} kcal</div>
+                        <div style="color: var(--text);">${r.desc || 'Brak opisu.'}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterRecipes() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.recipe-item');
+
+            items.forEach(item => {
+                const searchData = item.getAttribute('data-search');
+                if (searchData.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        renderRecipes();
     </script>
 </body>
 </html>
