@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Przepisy i Kalkulator 🥗</title>
+    <title>Przepisy - Aplikacja Fitness 🥗</title>
     <style>
         :root {
             --primary: #4a90e2;
@@ -12,6 +15,17 @@
             --bg: #f4f7f9;
             --card-bg: #ffffff;
             --accent: #2ecc71;
+            --border: #e1e8ed;
+        }
+
+        body.dark-mode {
+            --primary: #5c9ded;
+            --primary-light: #1e293b;
+            --text: #f1f5f9;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #34d399;
+            --border: #334155;
         }
 
         body {
@@ -21,13 +35,25 @@
             padding: 15px;
             max-width: 500px;
             margin: 0 auto;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
         }
 
         .top-nav {
             display: flex;
             justify-content: space-around;
             background: var(--card-bg);
-            padding: 12px;
+            padding: 10px;
             border-radius: 16px;
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.04);
@@ -37,8 +63,8 @@
             text-decoration: none;
             color: #7a8b99;
             font-weight: 700;
-            font-size: 0.85rem;
-            padding: 8px 10px;
+            font-size: 0.8rem;
+            padding: 6px 8px;
             border-radius: 10px;
             transition: all 0.2s ease;
         }
@@ -59,303 +85,67 @@
         h2 {
             font-size: 1.1rem;
             margin-top: 0;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             color: var(--text);
         }
 
-        label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #7a8b99;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #e1e8ed;
-            border-radius: 10px;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-
-        .calc-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-
-        .ingredient-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .ingredient-row input {
-            margin-bottom: 0;
-            padding: 8px;
-            font-size: 0.82rem;
-        }
-
-        .btn-main {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            background: var(--primary);
-            color: white;
-            font-weight: 800;
-            font-size: 0.95rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
-        }
-
-        .btn-green {
-            background: var(--accent);
-            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
-        }
-
-        .btn-small {
-            background: #edf2f7;
-            color: #4a5568;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .totals-summary {
-            display: flex;
-            justify-content: space-around;
-            background: #eef2f7;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 0.9rem;
-            color: var(--text);
-            margin-bottom: 12px;
-        }
-
-        .recipe-card {
-            background: #ffffff;
-            border: 1px solid #edf2f7;
+        .recipe-box {
+            background: var(--primary-light);
+            padding: 15px;
             border-radius: 14px;
-            padding: 14px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            border: 1px solid var(--border);
         }
     </style>
 </head>
 <body>
 
-    <!-- NAWIGACJA -->
+    <!-- PASEK UŻYTKOWNIKA -->
+    <div class="user-bar">
+        <div id="userInfo" style="font-weight: 700; font-size: 0.85rem; color: var(--text);">
+            🥗 Kącik Przepisów
+        </div>
+        <button onclick="toggleDarkMode()" style="background:none; border:none; cursor:pointer; font-size:1.1rem;" title="Przełącz motyw">🌙</button>
+    </div>
+
+    <!-- NOWA NAWIGACJA Z PRZEPISAMI -->
     <nav class="top-nav">
         <a href="index.html" class="nav-link">🏠 Główna</a>
         <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
         <a href="trening.html" class="nav-link">⏱️ Trening</a>
+        <a href="statystyki.html" class="nav-link">📊 Staty</a>
         <a href="przepisy.html" class="nav-link active">🥗 Przepisy</a>
     </nav>
 
-    <!-- TWORZENIE PRZEPISU Z KALKULATOREM -->
+    <!-- LISTA PRZEPISÓW -->
     <div class="card">
-        <h2>👩‍🍳 Kreator i Kalkulator Przepisu</h2>
+        <h2>✨ Szybkie Przepisy (Airfryer / Fit)</h2>
         
-        <label>Nazwa dania / przepisu:</label>
-        <input type="text" id="recipeName" placeholder="np. Szybki Omlet z Warzywami">
-
-        <!-- KALKULATOR SKŁADNIKÓW -->
-        <div class="calc-box">
-            <label style="color: var(--primary);">🧮 Składniki i przelicznik (w g):</label>
-            <div id="ingredientsList">
-                <!-- Tutaj dynamicznie dodają się wiersze -->
-            </div>
-            
-            <button class="btn-small" onclick="addIngredientRow()">+ Dodaj kolejny składnik</button>
+        <div class="recipe-box">
+            <h3 style="margin:0 0 8px 0; font-size:0.95rem; color:var(--primary);">🍫 Czekoladowe ciacho z airfryera</h3>
+            <p style="margin:0; font-size:0.85rem; color:var(--text); line-height:1.4;">
+                Szybka porcja słodkości na szybko. Wymieszaj składniki, wrzuć do foremki i upiecz w airfryerze. Bez zbędnego czekania!
+            </p>
         </div>
 
-        <!-- PODSUMOWANIE Z KALKULATORA -->
-        <div class="totals-summary">
-            <span>🔥 Suma: <span id="totalKcal">0</span> kcal</span>
-            <span>💪 Białko: <span id="totalProtein">0</span> g</span>
+        <div class="recipe-box">
+            <h3 style="margin:0 0 8px 0; font-size:0.95rem; color:var(--primary);">🥞 Owsiane muffinki</h3>
+            <p style="margin:0; font-size:0.85rem; color:var(--text); line-height:1.4;">
+                Idealne na drugie śniadanie lub szybką przekąskę do szkoły.
+            </p>
         </div>
-
-        <label>Instrukcja / Sposób przygotowania (opcjonalnie):</label>
-        <textarea id="recipeSteps" rows="2" placeholder="np. Wymieszaj składniki i smaż na małym ogniu..."></textarea>
-
-        <button class="btn-main btn-green" onclick="saveRecipe()">💾 Zapisz przepis w bazie</button>
-    </div>
-
-    <!-- MOJA KSIĄŻKA PRZEPISÓW -->
-    <div class="card">
-        <h2>📚 Moje Przepisy (<span id="recipesCount">0</span>)</h2>
-        <div id="savedRecipesContainer"></div>
     </div>
 
     <script>
-        let recipes = JSON.parse(localStorage.getItem('myCustomRecipesList')) || [];
-
-        // Inicjalizacja z jednym pustym wierszem
-        window.onload = function() {
-            addIngredientRow();
-            renderRecipes();
-        };
-
-        // DODAWANIE WIERSZA W KALKULATORZE
-        function addIngredientRow() {
-            const container = document.getElementById('ingredientsList');
-            const rowId = Date.now() + Math.random();
-
-            const row = document.createElement('div');
-            row.className = 'ingredient-row';
-            row.id = `row-${rowId}`;
-            row.innerHTML = `
-                <input type="text" placeholder="Nazwa (np. Mleko)" style="flex: 2;" class="ing-name">
-                <input type="number" placeholder="Ile (g)" style="flex: 1;" class="ing-grams" oninput="calculateTotals()">
-                <input type="number" placeholder="kcal/100g" style="flex: 1;" class="ing-kcal100" oninput="calculateTotals()">
-                <input type="number" placeholder="b/100g" style="flex: 1;" class="ing-prot100" oninput="calculateTotals()">
-                <button onclick="removeRow('row-${rowId}')" style="background:none; border:none; cursor:pointer; font-size:1rem;">❌</button>
-            `;
-            container.appendChild(row);
+        // Tryb ciemny
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
         }
 
-        function removeRow(id) {
-            const row = document.getElementById(id);
-            if (row) {
-                row.remove();
-                calculateTotals();
-            }
-        }
-
-        // DYNAMICZNE PRZELICZANIE KALORII I BIAŁKA
-        function calculateTotals() {
-            let totalKcal = 0;
-            let totalProtein = 0;
-
-            const rows = document.querySelectorAll('.ingredient-row');
-            rows.forEach(row => {
-                const grams = parseFloat(row.querySelector('.ing-grams').value) || 0;
-                const kcal100 = parseFloat(row.querySelector('.ing-kcal100').value) || 0;
-                const prot100 = parseFloat(row.querySelector('.ing-prot100').value) || 0;
-
-                totalKcal += (grams * kcal100) / 100;
-                totalProtein += (grams * prot100) / 100;
-            });
-
-            document.getElementById('totalKcal').textContent = Math.round(totalKcal);
-            document.getElementById('totalProtein').textContent = Math.round(totalProtein * 10) / 10;
-        }
-
-        // ZAPISANIE PRZEPISU
-        function saveRecipe() {
-            const name = document.getElementById('recipeName').value.trim();
-            const kcal = parseInt(document.getElementById('totalKcal').textContent);
-            const protein = parseFloat(document.getElementById('totalProtein').textContent);
-            const steps = document.getElementById('recipeSteps').value.trim();
-
-            if (!name) {
-                alert("Wpisz nazwę przepisu!");
-                return;
-            }
-
-            if (kcal <= 0) {
-                alert("Uzupełnij gramaturę i kaloryczność składników w kalkulatorze!");
-                return;
-            }
-
-            // Pobieramy listę składników jako tekst
-            let ingredientsTextArray = [];
-            const rows = document.querySelectorAll('.ingredient-row');
-            rows.forEach(row => {
-                const ingName = row.querySelector('.ing-name').value.trim();
-                const grams = row.querySelector('.ing-grams').value;
-                if (ingName && grams) {
-                    ingredientsTextArray.push(`${ingName} (${grams}g)`);
-                }
-            });
-
-            const newRecipe = {
-                id: Date.now(),
-                name: name,
-                kcal: kcal,
-                protein: protein,
-                ingredients: ingredientsTextArray.join(', '),
-                steps: steps
-            };
-
-            recipes.unshift(newRecipe);
-            localStorage.setItem('myCustomRecipesList', JSON.stringify(recipes));
-
-            // Czyszczenie formularza
-            document.getElementById('recipeName').value = '';
-            document.getElementById('recipeSteps').value = '';
-            document.getElementById('ingredientsList').innerHTML = '';
-            addIngredientRow();
-            calculateTotals();
-
-            renderRecipes();
-            alert("Przepis zapisany w Twojej bazie! ✨");
-        }
-
-        // WYŚWIETLANIE BAZY PRZEPISÓW
-        function renderRecipes() {
-            const container = document.getElementById('savedRecipesContainer');
-            document.getElementById('recipesCount').textContent = recipes.length;
-            container.innerHTML = '';
-
-            if (recipes.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.85rem;">Baza jest pusta. Dodaj swój pierwszy przepis wyżej! ☁️</p>';
-                return;
-            }
-
-            recipes.forEach((r, idx) => {
-                container.innerHTML += `
-                    <div class="recipe-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                            <strong style="font-size:1rem; color:#2c3e50;">${r.name}</strong>
-                            <button onclick="deleteRecipe(${idx})" style="background:none; border:none; cursor:pointer;">🗑️</button>
-                        </div>
-                        <div style="font-size:0.8rem; font-weight:700; color:#4a90e2; margin-bottom:8px;">
-                            🔥 ${r.kcal} kcal ${r.protein ? '| 💪 ' + r.protein + 'g białka' : ''}
-                        </div>
-                        ${r.ingredients ? `<div style="font-size:0.8rem; color:#5a6e7f; margin-bottom:6px;"><b>Składniki:</b> ${r.ingredients}</div>` : ''}
-                        ${r.steps ? `<div style="font-size:0.8rem; color:#7a8b99; margin-bottom:10px;"><b>Kroki:</b> ${r.steps}</div>` : ''}
-                        <button class="btn-small" style="width:100%; font-weight:700; color:#2ecc71; background:#eef9f2; border:1px solid #2ecc71;" onclick="eatMeal('${r.name}', ${r.kcal})">
-                            + Zjedz i dodaj do dzisiejszego bilansu (${r.kcal} kcal)
-                        </button>
-                    </div>
-                `;
-            });
-        }
-
-        function deleteRecipe(idx) {
-            if (confirm("Usunąć ten przepis?")) {
-                recipes.splice(idx, 1);
-                localStorage.setItem('myCustomRecipesList', JSON.stringify(recipes));
-                renderRecipes();
-            }
-        }
-
-        // DODAWANIE DO KALORII NA STRONIE GŁÓWNEJ I POSIŁKACH
-        function eatMeal(name, kcal) {
-            let todayMeals = JSON.parse(localStorage.getItem('todayMealsList')) || [];
-            const timeStr = new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-            
-            todayMeals.unshift({ name: name, kcal: kcal, time: timeStr });
-            localStorage.setItem('todayMealsList', JSON.stringify(todayMeals));
-
-            let currentKcal = parseInt(localStorage.getItem('todayCalories')) || 0;
-            currentKcal += kcal;
-            localStorage.setItem('todayCalories', currentKcal);
-
-            alert(`Dodano "${name}" (${kcal} kcal) do dzisiejszego bilansu! 🍽️`);
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
         }
     </script>
 </body>
