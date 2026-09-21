@@ -173,7 +173,7 @@
         </div>
     </div>
 
-    <script>
+        <script>
         // Tryb ciemny
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
@@ -222,6 +222,8 @@
             if(meals.length === 0) {
                 listEl.innerHTML = 'Brak zapisanego jedzenia na dziś.';
                 totalEl.innerHTML = 'Suma: 0 kcal';
+                // Synchronizacja z głównym widokiem (0 kcal)
+                localStorage.setItem('todayConsumedKcal', '0');
                 return;
             }
 
@@ -236,7 +238,7 @@
                     catMeals.forEach(m => {
                         total += m.kcal;
                         html += `
-                            <div class="meal-card-item">
+                            <div class="meal-card-item" style="display:flex; justify-content:space-between; align-items:center; background:var(--primary-light); padding:8px 12px; border-radius:10px; margin-bottom:6px; border:1px solid var(--border);">
                                 <div><b>${m.name}</b> (${m.kcal} kcal)</div>
                                 <button onclick="deleteMeal(${m.id})" style="background:none; border:none; cursor:pointer;" title="Usuń">🗑️</button>
                             </div>
@@ -247,9 +249,13 @@
 
             listEl.innerHTML = html;
             totalEl.innerHTML = `Suma: <b>${total}</b> kcal`;
+
+            // KLUCZOWY KROK: Zapisujemy sumę do klucza, który czyta strona główna!
+            localStorage.setItem('todayConsumedKcal', total);
         }
 
         loadMeals();
     </script>
+
 </body>
 </html>
