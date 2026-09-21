@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Przepisy - Aplikacja Fitness 🥗</title>
+    <title>Przepisy i Kalkulator - Aplikacja Fitness 🥗</title>
     <style>
         :root {
             --primary: #4a90e2;
@@ -26,12 +26,6 @@
             --card-bg: #1e293b;
             --accent: #34d399;
             --border: #334155;
-        }
-
-        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
-            background: #0f172a;
-            color: #f1f5f9;
-            border-color: var(--border);
         }
 
         body {
@@ -91,57 +85,96 @@
         h2 {
             font-size: 1.1rem;
             margin-top: 0;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             color: var(--text);
         }
 
-        input, select, textarea {
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #7a8b99;
+            margin-bottom: 5px;
+        }
+
+        input {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
             border-radius: 10px;
             border: 1px solid var(--border);
-            background: var(--card-bg);
+            background: var(--bg);
             color: var(--text);
+            font-size: 0.9rem;
             box-sizing: border-box;
-            font-family: inherit;
         }
 
-        textarea {
-            resize: vertical;
-            height: 70px;
-        }
-
-        .btn-main {
+        .action-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 12px;
             font-weight: 700;
             cursor: pointer;
+            font-size: 0.9rem;
             width: 100%;
+            transition: opacity 0.2s;
         }
 
-        .recipe-item {
-            padding: 12px;
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .recipe-card {
             background: var(--primary-light);
-            border-radius: 12px;
+            padding: 15px;
+            border-radius: 14px;
             margin-bottom: 10px;
+            cursor: pointer;
             border: 1px solid var(--border);
-            font-size: 0.85rem;
+            transition: transform 0.2s;
         }
 
-        .recipe-title {
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 4px;
+        .recipe-card:hover {
+            transform: scale(1.02);
         }
 
-        .recipe-meta {
-            font-size: 0.75rem;
-            color: #7a8b99;
-            margin-bottom: 6px;
+        /* MODAL (OKIENKO) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 15px;
+            background: none; border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text);
         }
     </style>
 </head>
@@ -149,45 +182,56 @@
 
     <!-- PASEK UŻYTKOWNIKA -->
     <div class="user-bar">
-        <div style="font-weight: 700; font-size: 0.85rem;">🥗 Baza i Konfigurator Przepisów</div>
+        <div style="font-weight: 700; font-size: 0.85rem;">🥗 Przepisy i Kalkulator</div>
         <button onclick="toggleDarkMode()" style="background:none; border:none; cursor:pointer; font-size:1.1rem;" title="Przełącz motyw">🌙</button>
     </div>
 
     <!-- NAWIGACJA -->
     <nav class="top-nav">
-        <a href="index.html" class="nav-link">🏠 Główna</a>
-        <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
-        <a href="trening.html" class="nav-link">⏱️ Trening</a>
-        <a href="statystyki.html" class="nav-link">📊 Staty</a>
-        <a href="przepisy.html" class="nav-link active">🥗 Przepisy</a>
+        <a href="./index.html" class="nav-link">🏠 Główna</a>
+        <a href="./posilki.html" class="nav-link">🍽️ Posiłki</a>
+        <a href="./trening.html" class="nav-link">⏱️ Trening</a>
+        <a href="./statystyki.html" class="nav-link">📊 Staty</a>
+        <a href="./przepisy.html" class="nav-link active">🥗 Przepisy</a>
     </nav>
 
-    <!-- KONFIGURATOR / DODAWANIE PRZEPISU -->
+    <!-- KALKULATOR KALORII -->
     <div class="card">
-        <h2>➕ Dodaj Własny Przepis</h2>
-        <input type="text" id="recipeName" placeholder="Nazwa przepisu (np. Owsianka bananowa)">
-        <select id="recipeCategory">
-            <option value="Śniadania">Śniadania / Na słodko</option>
-            <option value="Airfryer">Airfryer / Szybkie</option>
-            <option value="Obiady">Obiady / Główne</option>
-            <option value="Przekąski">Przekąski</option>
-        </select>
-        <input type="number" id="recipeKcal" placeholder="Szacowane kalorie (kcal)">
-        <textarea id="recipeDesc" placeholder="Krótki opis lub składniki..."></textarea>
-        <button class="btn-main" onclick="addRecipe()">Zapisz przepis</button>
+        <h2>🧮 Szybki Kalkulator Kalorii Produktu</h2>
+        <div class="form-group">
+            <label for="calcKcal100">Kalorie w 100g produktu</label>
+            <input type="number" id="calcKcal100" placeholder="np. 150">
+        </div>
+        <div class="form-group">
+            <label for="calcWeight">Waga porcji (w gramach)</label>
+            <input type="number" id="calcWeight" placeholder="np. 250">
+        </div>
+        <button class="action-btn" onclick="calculateCalories()">Oblicz kalorie</button>
+        <div id="calcResult" style="margin-top: 12px; font-weight: 700; text-align: center; color: var(--primary);"></div>
     </div>
 
-    <!-- WYSZUKIWARKA -->
+    <!-- BAZA PRZEPISÓW -->
     <div class="card">
-        <h2>🔍 Szukaj w przepisach</h2>
-        <input type="text" id="searchInput" placeholder="Wpisz szukaną frazę..." onkeyup="filterRecipes()">
+        <h2>📖 Książka Przepisów</h2>
+        <div style="font-size: 0.8rem; color: #7a8b99; margin-bottom: 12px;">Kliknij w przepis, aby zobaczyć szczegóły, składniki i kroki przygotowania.</div>
+        
+        <div id="recipesList">
+            <!-- Przepisy generowane dynamicznie -->
+        </div>
     </div>
 
-    <!-- LISTA PRZEPISÓW -->
-    <div class="card">
-        <h2>📋 Twoje Przepisy i Inspiracje</h2>
-        <div id="recipesContainer">
-            <!-- Tutaj wskakują przepisy -->
+    <!-- MODAL (OKIENKO SZCZEGÓŁÓW) -->
+    <div class="modal" id="recipeModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">✕</button>
+            <h2 id="modalTitle" style="padding-right: 20px;">Tytuł przepisu</h2>
+            <div id="modalTime" style="font-size: 0.8rem; color: var(--primary); font-weight: 700; margin-bottom: 10px;"></div>
+            
+            <h3 style="font-size: 0.9rem; margin-top: 15px; margin-bottom: 5px;">Składniki:</h3>
+            <ul id="modalIngredients" style="font-size: 0.85rem; padding-left: 20px; margin-top: 0; color: var(--text);"></ul>
+
+            <h3 style="font-size: 0.9rem; margin-top: 15px; margin-bottom: 5px;">Przygotowanie:</h3>
+            <ol id="modalSteps" style="font-size: 0.85rem; padding-left: 20px; margin-top: 0; color: var(--text);"></ol>
         </div>
     </div>
 
@@ -203,78 +247,101 @@
             document.body.classList.add('dark-mode');
         }
 
-        // Baza przepisów w localStorage
-        let recipes = JSON.parse(localStorage.getItem('userRecipes')) || [
-            { id: 1, name: "Czekoladowe ciastko z airfryera", category: "Airfryer", kcal: 250, desc: "Szybka porcja słodkości w 10 minut. Wymieszaj i do airfryera!" },
-            { id: 2, name: "Pieczona owsianka z owocami", category: "Śniadania", kcal: 320, desc: "Ciepłe, sycące śniadanie na dobry początek dnia." },
-            { id: 3, name: "Chrupiący Camembert z warzywami", category: "Przekąski", kcal: 380, desc: "Rozgrzany serek na ciepło z ulubionymi dodatkami." }
+        // Kalkulator kalorii
+        function calculateCalories() {
+            const kcal100 = parseFloat(document.getElementById('calcKcal100').value);
+            const weight = parseFloat(document.getElementById('calcWeight').value);
+            const resultEl = document.getElementById('calcResult');
+
+            if (isNaN(kcal100) || isNaN(weight)) {
+                resultEl.textContent = 'Wprowadź poprawne wartości!';
+                return;
+            }
+
+            const total = (kcal100 * weight) / 100;
+            resultEl.textContent = `Całkowita wartość porcji: ${total.toFixed(0)} kcal`;
+        }
+
+        // Baza przepisów
+        const recipes = [
+            {
+                id: 1,
+                title: "Czekoladowe ciastko z airfryera",
+                time: "12 minut",
+                calories: "320 kcal",
+                ingredients: ["3 łyżki mąki owsianej", "1 łyżka kakao", "1 jajko", "2 łyżki mleka", "1 łyżeczka miodu lub słodzika", "Kostka gorzkiej czekolady do środka"],
+                steps: ["Wszystkie składniki (poza kostką czekolady) wymieszaj w małym naczyniu żaroodpornym.", "W środek wciśnij kostkę gorzkiej czekolady.", "Piecz w airfryerze w temperaturze 160°C przez około 10-12 minut."]
+            },
+            {
+                id: 2,
+                title: "Owsiane muffinki bananowe",
+                time: "20 minut",
+                calories: "250 kcal",
+                ingredients: ["1 dojrzały banan", "4 łyżki płatków owsianych", "1 jajko", "Pół łyżeczki proszku do pieczenia", "Opcjonalnie: odrobina cynamonu"],
+                steps: ["Rozgnieć banana widelcem w miseczce.", "Dodaj jajko, płatki owsiane oraz proszek do pieczenia i dokładnie wymieszaj masę.", "Przełóż do silikonowych foremek.", "Piecz w airfryerze w 170°C przez ok. 12-15 minut."]
+            },
+            {
+                id: 3,
+                title: "Camembert z żurawiną z airfryera",
+                time: "8 minut",
+                calories: "380 kcal",
+                ingredients: ["1 krążek sera Camembert", "1 łyżeczka konfitury żurawinowej", "Szczypta rozmarynu"],
+                steps: ["Netnij delikatnie wierzch sera w kratkę.", "Nałóż na środek łyżeczkę żurawiny i posyp rozmarynem.", "Włóż do airfryera na 180°C na około 6-8 minut, aż ser pięknie zmięknie i się rozpuści."]
+            }
         ];
 
-        function addRecipe() {
-            const name = document.getElementById('recipeName').value;
-            const category = document.getElementById('recipeCategory').value;
-            const kcal = parseInt(document.getElementById('recipeKcal').value);
-            const desc = document.getElementById('recipeDesc').value;
-
-            if (!name || isNaN(kcal)) {
-                alert("Podaj przynajmniej nazwę i kalorie!");
-                return;
-            }
-
-            const newRecipe = { id: Date.now(), name, category, kcal, desc };
-            recipes.unshift(newRecipe);
-            localStorage.setItem('userRecipes', JSON.stringify(recipes));
-
-            document.getElementById('recipeName').value = '';
-            document.getElementById('recipeKcal').value = '';
-            document.getElementById('recipeDesc').value = '';
-            renderRecipes();
-        }
-
-        function deleteRecipe(id) {
-            recipes = recipes.filter(r => r.id !== id);
-            localStorage.setItem('userRecipes', JSON.stringify(recipes));
-            renderRecipes();
-        }
-
-        function renderRecipes() {
-            const container = document.getElementById('recipesContainer');
+        function renderRecipesList() {
+            const container = document.getElementById('recipesList');
             container.innerHTML = '';
 
-            if (recipes.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#7a8b99; font-size:0.85rem;">Brak zapisanych przepisów.</p>';
-                return;
-            }
-
-            recipes.forEach(r => {
+            recipes.forEach(recipe => {
                 container.innerHTML += `
-                    <div class="recipe-item" data-search="${r.name.toLowerCase()} ${r.category.toLowerCase()} ${r.desc.toLowerCase()}">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <div class="recipe-title">${r.name}</div>
-                            <button onclick="deleteRecipe(${r.id})" style="background:none; border:none; cursor:pointer; font-size:0.9rem;" title="Usuń">🗑️</button>
+                    <div class="recipe-card" onclick="openRecipe(${recipe.id})">
+                        <div style="font-weight: 700; font-size: 0.9rem;">${recipe.title}</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #7a8b99; margin-top: 5px;">
+                            <span>⏱️ ${recipe.time}</span>
+                            <span>🔥 ${recipe.calories}</span>
                         </div>
-                        <div class="recipe-meta">Kategoria: <b>${r.category}</b> | ⚡ ${r.kcal} kcal</div>
-                        <div style="color: var(--text);">${r.desc || 'Brak opisu.'}</div>
                     </div>
                 `;
             });
         }
 
-        function filterRecipes() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const items = document.querySelectorAll('.recipe-item');
+        function openRecipe(id) {
+            const recipe = recipes.find(r => r.id === id);
+            if (!recipe) return;
 
-            items.forEach(item => {
-                const searchData = item.getAttribute('data-search');
-                if (searchData.includes(query)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
+            document.getElementById('modalTitle').textContent = recipe.title;
+            document.getElementById('modalTime').textContent = `Czas: ${recipe.time} | Wartość: ${recipe.calories}`;
+
+            const ingList = document.getElementById('modalIngredients');
+            ingList.innerHTML = '';
+            recipe.ingredients.forEach(ing => {
+                ingList.innerHTML += `<li>${ing}</li>`;
             });
+
+            const stepsList = document.getElementById('modalSteps');
+            stepsList.innerHTML = '';
+            recipe.steps.forEach(step => {
+                stepsList.innerHTML += `<li style="margin-bottom: 6px;">${step}</li>`;
+            });
+
+            document.getElementById('recipeModal').style.display = 'flex';
         }
 
-        renderRecipes();
+        function closeModal() {
+            document.getElementById('recipeModal').style.display = 'none';
+        }
+
+        // Zamknięcie modala po kliknięciu w tło
+        window.onclick = function(event) {
+            const modal = document.getElementById('recipeModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        renderRecipesList();
     </script>
 </body>
 </html>
