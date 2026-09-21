@@ -28,6 +28,12 @@
             --border: #334155;
         }
 
+        body.dark-mode input, body.dark-mode select {
+            background: #0f172a;
+            color: #f1f5f9;
+            border-color: var(--border);
+        }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background: var(--bg);
@@ -98,9 +104,10 @@
             background: var(--card-bg);
             color: var(--text);
             box-sizing: border-box;
+            font-family: inherit;
         }
 
-        button.btn-main {
+        .btn-main {
             background: var(--primary);
             color: white;
             border: none;
@@ -110,13 +117,25 @@
             cursor: pointer;
             width: 100%;
         }
+
+        .meal-card-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: var(--primary-light);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+        }
     </style>
 </head>
 <body>
 
     <!-- PASEK UŻYTKOWNIKA -->
     <div class="user-bar">
-        <div style="font-weight: 700; font-size: 0.85rem;">🍽️ Rejestr Posiłków</div>
+        <div style="font-weight: 700; font-size: 0.85rem;">🍽️ Rejestr Posiłków i Kategorie</div>
         <button onclick="toggleDarkMode()" style="background:none; border:none; cursor:pointer; font-size:1.1rem;" title="Przełącz motyw">🌙</button>
     </div>
 
@@ -129,23 +148,33 @@
         <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
     </nav>
 
-    <!-- SEKCJ POSIŁKÓW -->
+    <!-- DODAWANIE POSIŁKU Z KATEGORIĄ -->
     <div class="card">
         <h2>Dodaj Posiłek</h2>
+        <select id="mealCategory">
+            <option value="Śniadanie">☀️ Śniadanie</option>
+            <option value="Obiad">🍲 Obiad</option>
+            <option value="Kolacja">🌙 Kolacja</option>
+            <option value="Przekąska">🍎 Przekąska / Inne</option>
+        </select>
         <input type="text" id="mealName" placeholder="Nazwa posiłku (np. Owsianka)">
         <input type="number" id="mealKcal" placeholder="Kalorie (kcal)">
         <button class="btn-main" onclick="addMeal()">Dodaj do bilansu</button>
     </div>
 
+    <!-- DZISIEJSZE POSIŁKI PODZIELONE NA KATEGORIE -->
     <div class="card">
         <h2>Dzisiejsze Posiłki</h2>
         <div id="mealsList" style="font-size: 0.85rem; color: #7a8b99;">
             Brak zapisanego jedzenia na dziś.
         </div>
+        <div id="totalKcal" style="margin-top: 15px; font-weight: 700; font-size: 0.9rem; text-align: right; color: var(--text);">
+            Suma: 0 kcal
+        </div>
     </div>
 
     <script>
-        // Tryb ciemny - synchronizowany z resztą aplikacji
+        // Tryb ciemny
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
@@ -156,15 +185,17 @@
             document.body.classList.add('dark-mode');
         }
 
-        // Prosta obsługa dodawania posiłków
+        // Dodawanie posiłku
         function addMeal() {
+            const category = document.getElementById('mealCategory').value;
             const name = document.getElementById('mealName').value;
             const kcal = document.getElementById('mealKcal').value;
+            
             if(!name || !kcal) return alert('Wpisz nazwę i kalorie!');
 
             const todayStr = new Date().toISOString().split('T')[0];
             let meals = JSON.parse(localStorage.getItem(`meals_${todayStr}`) || '[]');
-            meals.push({name, kcal: parseInt(kcal)});
+            meals.push({id: Date.now(), category, name, kcal: parseInt(kcal)});
             localStorage.setItem(`meals_${todayStr}`, JSON.stringify(meals));
 
             document.getElementById('mealName').value = '';
@@ -172,22 +203,50 @@
             loadMeals();
         }
 
+        // Usuwanie pojedynczego posiłku
+        function deleteMeal(id) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            let meals = JSON.parse(localStorage.getItem(`meals_${todayStr}`) || '[]');
+            meals = meals.filter(m => m.id !== id);
+            localStorage.setItem(`meals_${todayStr}`, JSON.stringify(meals));
+            loadMeals();
+        }
+
+        // Ładowanie i grupowanie posiłków
         function loadMeals() {
             const todayStr = new Date().toISOString().split('T')[0];
             let meals = JSON.parse(localStorage.getItem(`meals_${todayStr}`) || '[]');
             const listEl = document.getElementById('mealsList');
+            const totalEl = document.getElementById('totalKcal');
             
             if(meals.length === 0) {
                 listEl.innerHTML = 'Brak zapisanego jedzenia na dziś.';
+                totalEl.innerHTML = 'Suma: 0 kcal';
                 return;
             }
 
-            let html = '<ul style="padding-left: 20px; margin: 0;">';
-            meals.forEach(m => {
-                html += `<li><b>${m.name}</b>: ${m.kcal} kcal</li>`;
+            let total = 0;
+            const categories = ['Śniadanie', 'Obiad', 'Kolacja', 'Przekąska'];
+            let html = '';
+
+            categories.forEach(cat => {
+                const catMeals = meals.filter(m => m.category === cat);
+                if (catMeals.length > 0) {
+                    html += `<div style="font-weight:700; margin-top:10px; margin-bottom:5px; color:var(--primary);">${cat}:</div>`;
+                    catMeals.forEach(m => {
+                        total += m.kcal;
+                        html += `
+                            <div class="meal-card-item">
+                                <div><b>${m.name}</b> (${m.kcal} kcal)</div>
+                                <button onclick="deleteMeal(${m.id})" style="background:none; border:none; cursor:pointer;" title="Usuń">🗑️</button>
+                            </div>
+                        `;
+                    });
+                }
             });
-            html += '</ul>';
+
             listEl.innerHTML = html;
+            totalEl.innerHTML = `Suma: <b>${total}</b> kcal`;
         }
 
         loadMeals();
