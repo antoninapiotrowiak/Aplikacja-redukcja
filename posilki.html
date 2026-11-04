@@ -10,6 +10,7 @@
     <title>Dziennik — jedzenie i makro</title>
     <link rel="stylesheet" href="app.css">
     <script src="app.js" defer></script>
+    <script src="food-catalog.js" defer></script>
     <script src="diary.js" defer></script>
 </head>
 <body class="app-page">
@@ -101,6 +102,7 @@
                 <label class="field-label" for="mealName">Nazwa produktu</label>
                 <input class="form-control" id="mealName" name="name" type="text" maxlength="80" placeholder="np. Owsianka z bananem" required>
             </div>
+            <button class="secondary-button food-picker-open" id="openFoodPicker" type="button">⌕ Wyszukaj produkt lub zeskanuj kod</button>
             <div class="form-grid serving-fields">
                 <div class="field">
                     <label class="field-label" for="mealServing">Porcja</label>
@@ -134,6 +136,40 @@
                 <button class="primary-button" type="submit">Dodaj posiłek</button>
             </div>
         </form>
+    </dialog>
+
+    <dialog class="meal-dialog food-picker-dialog" id="foodPickerDialog" aria-labelledby="foodPickerTitle">
+        <div class="meal-dialog-content">
+            <div class="dialog-heading">
+                <div>
+                    <p class="eyebrow" style="margin:0">Produkty i szybkie dodawanie</p>
+                    <h2 id="foodPickerTitle" style="margin:4px 0 0">Wybierz produkt</h2>
+                </div>
+                <button class="icon-button dialog-close" id="closeFoodPicker" type="button" aria-label="Zamknij">×</button>
+            </div>
+            <p class="muted food-catalog-note">Wartości wstępnej bazy są orientacyjne. Produkty, które dodasz lub zeskanujesz, zapiszą się lokalnie w Twojej bazie. Kod produktu jest wyszukiwany w Open Food Facts.</p>
+            <label class="field-label" for="foodSearch">Nazwa produktu</label>
+            <input class="form-control" id="foodSearch" type="search" placeholder="np. jogurt, ryż, jabłko">
+            <div class="food-picker-results" id="foodSearchResults"></div>
+            <form class="barcode-lookup" id="barcodeForm">
+                <label class="field-label" for="barcodeInput">Kod kreskowy</label>
+                <div class="barcode-input-row">
+                    <input class="form-control" id="barcodeInput" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="Zeskanuj lub wpisz kod">
+                    <button class="secondary-button" type="submit">Szukaj</button>
+                </div>
+                <button class="text-button" id="startBarcodeScanner" type="button">▦ Otwórz aparat</button>
+                <video id="barcodeVideo" class="barcode-video" playsinline muted hidden></video>
+                <p class="food-picker-message muted" id="foodPickerMessage" aria-live="polite"></p>
+            </form>
+            <section class="food-description-tool" aria-labelledby="descriptionToolTitle">
+                <h3 id="descriptionToolTitle">Dodaj z krótkiego opisu</h3>
+                <p class="muted">Lokalne obliczenie z bazy produktów (bez AI). Wpisz ilość i nazwę, np. „150 g ryżu, 100 g kurczaka”.</p>
+                <textarea class="form-control description-input" id="foodDescription" rows="2" placeholder="150 g ryżu, 100 g kurczaka"></textarea>
+                <button class="secondary-button" id="estimateDescription" type="button">Oblicz z bazy</button>
+                <div id="descriptionPreview" class="description-preview" hidden></div>
+                <button class="primary-button" id="addDescriptionToDiary" type="button" hidden>Uzupełnij formularz posiłku</button>
+            </section>
+        </div>
     </dialog>
 
     <dialog class="meal-dialog category-dialog" id="categoryDialog" aria-labelledby="categoryDialogTitle">

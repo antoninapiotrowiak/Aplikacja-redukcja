@@ -16,6 +16,14 @@
     const mealDialog = document.getElementById('mealDialog');
     const mealForm = document.getElementById('mealForm');
     const categoryDialog = document.getElementById('categoryDialog');
+    const foodPickerDialog = document.getElementById('foodPickerDialog');
+    const foodSearch = document.getElementById('foodSearch');
+    const foodSearchResults = document.getElementById('foodSearchResults');
+    const foodPickerMessage = document.getElementById('foodPickerMessage');
+    const barcodeVideo = document.getElementById('barcodeVideo');
+    let scannerStream = null;
+    let scannerFrame = null;
+    let scannerDetector = null;
 
     function readCustomCategories() {
         const saved = localStorage.getItem(customCategoriesKey);
@@ -264,6 +272,212 @@
         mealForm.reset();
     }
 
+    function showFoodPickerMessage(message, isError = false) {
+        foodPickerMessage.textContent = message;
+        foodPickerMessage.classList.toggle('is-error', isError);
+    }
+
+    function setMealFromProduct(product, amount) {
+        const isPer100g = product.basis === '100g';
+        const factor = isPer100g ? amount / 100 : amount;
+        mealForm.elements.name.value = product.name;
+        mealForm.elements.serving.value = isPer100g
+            ? `${amount} g`
+            : `${amount} × ${product.serving || 'porcja'}`;
+        mealForm.elements.kcal.value = String(Math.round(Number(product.kcal) * factor));
+        ['protein', 'fat', 'carbs'].forEach((key) => {
+            mealForm.elements[key].value = product[key] === null || product[key] === undefined
+                ? ''
+                : (Number(product[key]) * factor).toFixed(1);
+        });
+        stopBarcodeScanner();
+        foodPickerDialog.close();
+        document.getElementById('mealCalories').focus();
+    }
+
+    function renderFoodSearchResults(query = '') {
+        const products = FoodCatalog.search(query).slice(0, 15);
+        foodSearchResults.replaceChildren();
+        if (!products.length) {
+            const empty = document.createElement('p');
+            empty.className = 'muted';
+            empty.textContent = query ? 'Brak produktu w bazie. Możesz wpisać go ręcznie w formularzu.' : 'Brak zapisanych produktów.';
+            foodSearchResults.append(empty);
+            return;
+        }
+
+        products.forEach((product) => {
+            const item = document.createElement('article');
+            item.className = 'food-picker-result';
+            const description = document.createElement('div');
+            description.className = 'food-picker-result-info';
+            const name = document.createElement('strong');
+            name.textContent = product.name;
+            const details = document.createElement('span');
+            details.className = 'muted';
+            const isPer100g = product.basis === '100g';
+            details.textContent = `${product.brand ? `${product.brand} · ` : ''}${Math.round(Number(product.kcal))} kcal / ${isPer100g ? '100 g' : (product.serving || 'porcję')}`;
+            description.append(name, details);
+
+            const controls = document.createElement('div');
+            controls.className = 'food-picker-result-controls';
+            const amount = document.createElement('input');
+            amount.className = 'form-control food-amount-input';
+            amount.type = 'number';
+            amount.min = '1';
+            amount.max = '10000';
+            amount.step = '1';
+            amount.value = isPer100g ? '100' : '1';
+            amount.setAttribute('aria-label', isPer100g ? `Ilość produktu ${product.name} w gramach` : `Liczba porcji produktu ${product.name}`);
+            const add = document.createElement('button');
+            add.className = 'secondary-button';
+            add.type = 'button';
+            add.textContent = 'Wybierz';
+            add.addEventListener('click', () => {
+                const quantity = Number(amount.value);
+                if (!Number.isFinite(quantity) || quantity <= 0 || quantity > 10000) {
+                    showFoodPickerMessage('Podaj ilość większą od zera i nieprzekraczającą 10 000.', true);
+                    amount.focus();
+                    return;
+                }
+                setMealFromProduct(product, quantity);
+            });
+            controls.append(amount, add);
+            item.append(description, controls);
+            foodSearchResults.append(item);
+        });
+    }
+
+    function stopBarcodeScanner() {
+        if (scannerFrame !== null) window.cancelAnimationFrame(scannerFrame);
+        scannerFrame = null;
+        if (scannerStream) scannerStream.getTracks().forEach((track) => track.stop());
+        scannerStream = null;
+        scannerDetector = null;
+        barcodeVideo.pause();
+        barcodeVideo.srcObject = null;
+        barcodeVideo.hidden = true;
+        const button = document.getElementById('startBarcodeScanner');
+        button.textContent = '▦ Otwórz aparat';
+    }
+
+    async function scanBarcodeFrame() {
+        if (!scannerStream || !scannerDetector) return;
+        try {
+            const detections = await scannerDetector.detect(barcodeVideo);
+            const code = detections.find((item) => item.rawValue)?.rawValue;
+            if (code) {
+                document.getElementById('barcodeInput').value = code;
+                stopBarcodeScanner();
+                lookupAndSelectBarcode(code);
+                return;
+            }
+        } catch (error) {
+            console.error('Nie udało się odczytać kodu z obrazu aparatu.', error);
+            showFoodPickerMessage('Nie udało się odczytać obrazu. Spróbuj ponownie lub wpisz kod ręcznie.', true);
+            stopBarcodeScanner();
+            return;
+        }
+        scannerFrame = window.requestAnimationFrame(scanBarcodeFrame);
+    }
+
+    async function startBarcodeScanner() {
+        if (scannerStream) {
+            stopBarcodeScanner();
+            return;
+        }
+        if (!('BarcodeDetector' in window)) {
+            showFoodPickerMessage('Ta przeglądarka nie obsługuje skanowania kodów. Wpisz kod ręcznie.', true);
+            return;
+        }
+        if (!navigator.mediaDevices?.getUserMedia) {
+            showFoodPickerMessage('Aparat wymaga bezpiecznego połączenia HTTPS. Wpisz kod ręcznie.', true);
+            return;
+        }
+        try {
+            const formats = await window.BarcodeDetector.getSupportedFormats();
+            const supportedFormats = formats.filter((format) => ['ean_13', 'ean_8', 'upc_a', 'upc_e'].includes(format));
+            if (!supportedFormats.length) {
+                showFoodPickerMessage('Brak obsługiwanych formatów kodów kreskowych. Wpisz kod ręcznie.', true);
+                return;
+            }
+            scannerDetector = new window.BarcodeDetector({ formats: supportedFormats });
+            scannerStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: 'environment' } },
+                audio: false
+            });
+            barcodeVideo.srcObject = scannerStream;
+            barcodeVideo.hidden = false;
+            await barcodeVideo.play();
+            document.getElementById('startBarcodeScanner').textContent = 'Zatrzymaj aparat';
+            showFoodPickerMessage('Skieruj aparat na kod kreskowy produktu.');
+            scanBarcodeFrame();
+        } catch (error) {
+            stopBarcodeScanner();
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                showFoodPickerMessage('Brak zgody na użycie aparatu. Wpisz kod kreskowy ręcznie.', true);
+            } else if (error.name === 'NotFoundError') {
+                showFoodPickerMessage('Nie znaleziono aparatu. Wpisz kod kreskowy ręcznie.', true);
+            } else {
+                console.error('Nie udało się uruchomić skanera kodów.', error);
+                showFoodPickerMessage('Nie udało się uruchomić aparatu. Wpisz kod kreskowy ręcznie.', true);
+            }
+        }
+    }
+
+    async function lookupAndSelectBarcode(code) {
+        const lookupButton = document.querySelector('#barcodeForm button[type="submit"]');
+        lookupButton.disabled = true;
+        showFoodPickerMessage('Szukam produktu w Open Food Facts…');
+        try {
+            const product = await FoodCatalog.lookupBarcode(code);
+            showFoodPickerMessage(`Znaleziono: ${product.name}. Dane zostały zapisane w lokalnej bazie.`);
+            renderFoodSearchResults(product.name);
+            const quantity = product.basis === '100g' ? 100 : 1;
+            setMealFromProduct(product, quantity);
+        } catch (error) {
+            showFoodPickerMessage(error.message || 'Nie udało się wyszukać produktu.', true);
+        } finally {
+            lookupButton.disabled = false;
+        }
+    }
+
+    function estimateFoodDescription() {
+        const preview = document.getElementById('descriptionPreview');
+        const addButton = document.getElementById('addDescriptionToDiary');
+        preview.replaceChildren();
+        addButton.hidden = true;
+        try {
+            const result = FoodCatalog.calculateDescription(document.getElementById('foodDescription').value);
+            const list = document.createElement('ul');
+            result.lines.forEach(({ product, amount }) => {
+                const entry = document.createElement('li');
+                entry.textContent = `${product.name} — ${amount} g`;
+                list.append(entry);
+            });
+            const totals = document.createElement('p');
+            totals.textContent = `Razem: ${result.kcal} kcal · B ${result.protein ?? '—'} g · T ${result.fat ?? '—'} g · W ${result.carbs ?? '—'} g`;
+            preview.append(list, totals);
+            preview.hidden = false;
+            addButton.hidden = false;
+            showFoodPickerMessage('To orientacyjne obliczenie z lokalnej bazy, nie analiza AI.');
+            addButton.onclick = () => {
+                const name = document.getElementById('foodDescription').value.trim().slice(0, 80);
+                mealForm.elements.name.value = name;
+                mealForm.elements.serving.value = 'całość';
+                mealForm.elements.kcal.value = String(result.kcal);
+                ['protein', 'fat', 'carbs'].forEach((key) => {
+                    mealForm.elements[key].value = result[key] === null ? '' : String(result[key]);
+                });
+                foodPickerDialog.close();
+                document.getElementById('mealCalories').focus();
+            };
+        } catch (error) {
+            preview.hidden = true;
+            showFoodPickerMessage(error.message || 'Nie udało się obliczyć opisu.', true);
+        }
+    }
+
     function removeMeal(id) {
         const dayKey = FitnessApp.dateKey(selectedDate);
         const meals = FitnessApp.getMeals(dayKey).filter((meal) => String(meal.id) !== String(id));
@@ -370,6 +584,27 @@
         if (event.target === categoryDialog) categoryDialog.close();
     });
 
+    document.getElementById('openFoodPicker').addEventListener('click', () => {
+        foodSearch.value = '';
+        renderFoodSearchResults();
+        showFoodPickerMessage('');
+        foodPickerDialog.showModal();
+        foodSearch.focus();
+    });
+    document.getElementById('closeFoodPicker').addEventListener('click', () => foodPickerDialog.close());
+    foodPickerDialog.addEventListener('close', stopBarcodeScanner);
+    foodPickerDialog.addEventListener('cancel', stopBarcodeScanner);
+    foodPickerDialog.addEventListener('click', (event) => {
+        if (event.target === foodPickerDialog) foodPickerDialog.close();
+    });
+    foodSearch.addEventListener('input', () => renderFoodSearchResults(foodSearch.value));
+    document.getElementById('barcodeForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        lookupAndSelectBarcode(document.getElementById('barcodeInput').value);
+    });
+    document.getElementById('startBarcodeScanner').addEventListener('click', startBarcodeScanner);
+    document.getElementById('estimateDescription').addEventListener('click', estimateFoodDescription);
+
     mealForm.addEventListener('submit', (event) => {
         event.preventDefault();
         if (!mealForm.reportValidity()) return;
@@ -398,6 +633,12 @@
         const meals = FitnessApp.getMeals(dayKey);
         meals.push(meal);
         localStorage.setItem(`meals_${dayKey}`, JSON.stringify(meals));
+        try {
+            FoodCatalog.rememberMeal(meal);
+        } catch (error) {
+            console.error('Posiłek zapisano w dzienniku, ale nie udało się dodać go do bazy produktów.', error);
+            window.alert('Posiłek zapisano w dzienniku, ale nie udało się zapisać go w bazie produktów. Sprawdź dostępne miejsce w pamięci urządzenia.');
+        }
         closeMealDialog();
         renderDiary();
     });

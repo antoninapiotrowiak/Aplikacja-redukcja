@@ -8,6 +8,8 @@
     const fastingKey = 'fastingSession';
     const fastingAction = document.getElementById('fastingAction');
     const fastingProtocol = document.getElementById('fastingProtocol');
+    const trendMessage = document.getElementById('weightTrendMessage');
+    const calorieSuggestionButton = document.getElementById('acceptCalorieSuggestion');
 
     function getFastingSession() {
         const saved = localStorage.getItem(fastingKey);
@@ -74,8 +76,118 @@
     });
 
     function getRecords() {
-        const records = JSON.parse(localStorage.getItem(recordsKey) || '[]');
-        return Array.isArray(records) ? records : [];
+        const saved = localStorage.getItem(recordsKey);
+        if (!saved) return [];
+        let records;
+        try {
+            records = JSON.parse(saved);
+        } catch (error) {
+            console.error('Nie można odczytać historii pomiarów wagi.', error);
+            return [];
+        }
+        if (!Array.isArray(records)) {
+            console.error('Historia pomiarów wagi nie jest listą.');
+            return [];
+        }
+        return records.filter((record) => record && typeof record.date === 'string' &&
+            Number.isFinite(Number(record.weight)) && Number(record.weight) >= 1 && Number(record.weight) <= 500);
+    }
+
+    function getDateNumber(date) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+        const dateNumber = Date.parse(`${date}T00:00:00Z`);
+        return Number.isFinite(dateNumber) && new Date(dateNumber).toISOString().slice(0, 10) === date
+            ? Math.floor(dateNumber / 86400000)
+            : null;
+    }
+
+    function renderWeightTrend(records) {
+        calorieSuggestionButton.hidden = true;
+        const today = getDateNumber(FitnessApp.dateKey(new Date()));
+        const recentByDate = new Map();
+        records.forEach((record) => {
+            const day = getDateNumber(record.date);
+            if (day !== null && day >= today - 28 && day <= today) recentByDate.set(day, Number(record.weight));
+        });
+        const recent = [...recentByDate.entries()].sort((first, second) => first[0] - second[0]);
+        const accepted = localStorage.getItem('acceptedCalorieTrendSignature');
+
+        if (recent.length < 4 || recent[recent.length - 1][0] - recent[0][0] < 21 ||
+            today - recent[recent.length - 1][0] > 7) {
+            trendMessage.textContent = 'Dodaj co najmniej 4 pomiary w ciągu 21 dni, w tym jeden z ostatniego tygodnia. Analiza pominie krótkoterminowe wahania.';
+            return;
+        }
+
+        const firstDay = recent[0][0];
+        const points = recent.map(([day, weight]) => ({ day: day - firstDay, weight }));
+        const meanDay = points.reduce((sum, point) => sum + point.day, 0) / points.length;
+        const meanWeight = points.reduce((sum, point) => sum + point.weight, 0) / points.length;
+        const numerator = points.reduce((sum, point) => sum + (point.day - meanDay) * (point.weight - meanWeight), 0);
+        const denominator = points.reduce((sum, point) => sum + (point.day - meanDay) ** 2, 0);
+        const weeklyChange = denominator ? numerator / denominator * 7 : 0;
+        const latestWeight = recent[recent.length - 1][1];
+        const weeklyLossPercent = -weeklyChange / latestWeight * 100;
+        const signature = recent.map(([day, weight]) => `${day}:${weight}`).join('|');
+
+        if (weeklyLossPercent >= 0.75) {
+            trendMessage.textContent = `Trend wskazuje szybki spadek masy (około ${weeklyLossPercent.toFixed(1)}% tygodniowo). Rozważ zmniejszenie deficytu — możesz podnieść dzienny cel o 100 kcal.`;
+            if (accepted === signature) {
+                trendMessage.textContent += ' Cel został już podniesiony na podstawie tych pomiarów.';
+                return;
+            }
+            calorieSuggestionButton.textContent = 'Zwiększ cel o 100 kcal';
+            calorieSuggestionButton.hidden = false;
+            calorieSuggestionButton.onclick = () => {
+                const currentGoal = Number(localStorage.getItem('userCalorieGoal')) || 2000;
+                if (currentGoal + 100 > 10000) {
+                    trendMessage.textContent = 'Nie można zwiększyć celu — osiągnąłby maksymalną dozwoloną wartość.';
+                    calorieSuggestionButton.hidden = true;
+                    return;
+                }
+                localStorage.setItem('userCalorieGoal', String(currentGoal + 100));
+                localStorage.setItem('acceptedCalorieTrendSignature', signature);
+                renderProfile();
+            };
+        } else if (weeklyLossPercent <= -0.15) {
+            trendMessage.textContent = `Trend wskazuje wzrost masy (około ${Math.abs(weeklyLossPercent).toFixed(1)}% tygodniowo). Nie obniżamy celu automatycznie — sprawdź regularność pomiarów i kompletność wpisów.`;
+        } else if (weeklyLossPercent < 0.15) {
+            trendMessage.textContent = `Trend nie pokazuje wyraźnego spadku masy (około ${weeklyLossPercent.toFixed(1)}% tygodniowo). Nie obniżamy celu automatycznie — sprawdź regularność pomiarów i kompletność wpisów.`;
+        } else {
+            trendMessage.textContent = `Trend wynosi około ${weeklyLossPercent.toFixed(1)}% masy tygodniowo. Na podstawie tych pomiarów nie ma potrzeby zmieniać celu.`;
+        }
+    }
+
+    function renderDailyWidgets() {
+        const calories = FitnessApp.getTodayCalories();
+        const calorieGoal = Number(localStorage.getItem('userCalorieGoal')) || 2000;
+        const caloriePercent = Math.min(100, Math.round(calories / calorieGoal * 100));
+        document.getElementById('widgetCalories').textContent = String(calories);
+        document.getElementById('widgetCalorieGoal').textContent = String(calorieGoal);
+        document.getElementById('widgetCalorieProgress').style.width = `${caloriePercent}%`;
+        document.querySelector('[aria-label="Kalorie zjedzone względem celu"]').setAttribute('aria-valuenow', String(caloriePercent));
+
+        const dayKey = FitnessApp.dateKey(new Date());
+        const savedWater = localStorage.getItem(`water_${dayKey}`);
+        let entries = [];
+        if (savedWater) {
+            try {
+                const parsed = JSON.parse(savedWater);
+                if (Array.isArray(parsed)) {
+                    entries = parsed.filter((entry) => entry && Number.isFinite(Number(entry.amount)) && Number(entry.amount) > 0);
+                } else {
+                    console.error(`Dane wody dla ${dayKey} nie są listą.`);
+                }
+            } catch (error) {
+                console.error(`Nie można odczytać danych wody dla ${dayKey}.`, error);
+            }
+        }
+        const water = entries.reduce((sum, entry) => sum + Number(entry.amount), 0);
+        const waterGoal = Number(localStorage.getItem('waterGoal')) || 2000;
+        const waterPercent = Math.min(100, Math.round(water / waterGoal * 100));
+        document.getElementById('widgetWater').textContent = String(water);
+        document.getElementById('widgetWaterGoal').textContent = String(waterGoal);
+        document.getElementById('widgetWaterProgress').style.width = `${waterPercent}%`;
+        document.querySelector('[aria-label="Woda wypita względem celu"]').setAttribute('aria-valuenow', String(waterPercent));
     }
 
     function renderProfile() {
@@ -88,6 +200,7 @@
 
         document.getElementById('profileCalories').textContent = `${currentCalories} kcal`;
         document.getElementById('profileCalorieGoal').textContent = `${goal} kcal`;
+        renderDailyWidgets();
         document.getElementById('startingWeight').textContent = startWeight ? `${startWeight} kg` : '—';
         document.getElementById('currentWeight').textContent = currentWeight ? `${currentWeight} kg` : '—';
         document.getElementById('targetWeight').textContent = targetWeight ? `${targetWeight} kg` : '—';
@@ -118,6 +231,7 @@
             row.append(date, weight);
             history.append(row);
         });
+        renderWeightTrend(records);
     }
 
     weightForm.addEventListener('submit', (event) => {
@@ -149,6 +263,29 @@
         if (targetInput.value) localStorage.setItem(targetKey, String(target));
         message.textContent = 'Zapisano postępy.';
         renderProfile();
+    });
+
+    document.querySelectorAll('[data-home-water-add]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const dayKey = FitnessApp.dateKey(new Date());
+            const key = `water_${dayKey}`;
+            const saved = localStorage.getItem(key);
+            let entries = [];
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) entries = parsed;
+                    else console.error(`Dane wody dla ${dayKey} nie są listą.`);
+                } catch (error) {
+                    console.error(`Nie można odczytać danych wody dla ${dayKey}.`, error);
+                    window.alert('Nie udało się odczytać wcześniejszych wpisów wody. Nie dodano nowego wpisu.');
+                    return;
+                }
+            }
+            entries.push({ amount: Number(button.dataset.homeWaterAdd), added: Date.now() });
+            localStorage.setItem(key, JSON.stringify(entries));
+            renderDailyWidgets();
+        });
     });
 
     renderProfile();

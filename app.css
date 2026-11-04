@@ -31,6 +31,7 @@ body.dark-mode {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
+textarea:focus-visible,
 select:focus-visible {
     outline: 3px solid color-mix(in srgb, var(--primary) 62%, #fff);
     outline-offset: 2px;
@@ -281,6 +282,64 @@ a {
     display: block;
     margin-top: 4px;
     font-size: 1.2rem;
+}
+
+.dashboard-mini-widgets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0 0 16px;
+}
+
+.dashboard-mini-widget {
+    display: grid;
+    min-width: 0;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--bg);
+}
+
+.dashboard-mini-widget-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.dashboard-mini-widget-heading strong {
+    color: var(--primary-dark);
+    font-size: 1.1rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.dashboard-mini-widget-heading small {
+    font-size: 0.68rem;
+}
+
+.dashboard-mini-widget > p {
+    margin: 0;
+    font-size: 0.72rem;
+}
+
+.dashboard-mini-widget .progress-track {
+    height: 7px;
+}
+
+.dashboard-water-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.dashboard-water-actions .secondary-button {
+    min-height: 34px;
+    padding: 6px 9px;
+    font-size: 0.72rem;
 }
 
 .settings-list {
@@ -689,6 +748,32 @@ a {
 .water-undo:disabled {
     cursor: not-allowed;
     opacity: 0.45;
+}
+
+.weight-trend {
+    display: grid;
+    gap: 8px;
+    padding: 14px;
+    margin-top: 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg);
+}
+
+.weight-trend h3 {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.weight-trend > p {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.weight-trend .weight-trend-disclaimer {
+    color: var(--muted);
+    font-size: 0.72rem;
 }
 
 .custom-meal-list {
@@ -2079,6 +2164,156 @@ body.dark-mode {
     gap: 10px;
 }
 
+.food-picker-dialog {
+    width: min(620px, calc(100% - 24px));
+    max-height: min(92vh, 820px);
+}
+
+.food-catalog-note,
+.food-description-tool > .muted {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.food-picker-results {
+    display: grid;
+    max-height: 260px;
+    gap: 8px;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.food-picker-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.food-picker-result-info {
+    display: grid;
+    min-width: 0;
+    gap: 3px;
+}
+
+.food-picker-result-info strong {
+    overflow-wrap: anywhere;
+    font-size: 0.85rem;
+}
+
+.food-picker-result-info .muted {
+    font-size: 0.73rem;
+}
+
+.food-picker-result-controls,
+.barcode-input-row {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+}
+
+.food-amount-input {
+    width: 76px;
+    min-height: 38px;
+    padding: 6px;
+}
+
+.food-picker-result-controls .secondary-button,
+.barcode-input-row .secondary-button {
+    min-height: 38px;
+    padding: 7px 10px;
+    font-size: 0.78rem;
+}
+
+.barcode-lookup {
+    display: grid;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.barcode-input-row .form-control {
+    min-width: 0;
+}
+
+.text-button {
+    justify-self: start;
+    padding: 2px 0;
+    border: 0;
+    background: transparent;
+    color: var(--primary-dark);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.text-button:disabled,
+.barcode-input-row button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.barcode-video {
+    width: 100%;
+    max-height: 240px;
+    border-radius: 12px;
+    background: #111;
+    object-fit: cover;
+}
+
+.food-picker-message {
+    min-height: 1.1em;
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.food-picker-message.is-error {
+    color: #b3261e;
+}
+
+.food-description-tool {
+    display: grid;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.food-description-tool h3 {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.description-input {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.description-preview {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--bg);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.description-preview ul {
+    display: grid;
+    gap: 3px;
+    padding-left: 18px;
+    margin: 0;
+}
+
+.description-preview p {
+    margin: 8px 0 0;
+    font-weight: 700;
+}
+
 .legacy-page .user-bar {
     position: sticky;
     z-index: 15;
@@ -2113,6 +2348,10 @@ body.dark-mode {
 
 .profile-summary .eyebrow {
     font-size: 0.7rem;
+}
+
+.dashboard-mini-widgets {
+    grid-template-columns: 1fr;
 }
 
 .profile-name {
@@ -2265,6 +2504,23 @@ body.dark-mode {
 
     .meal-dialog-content {
         padding: 16px;
+    }
+
+    .food-picker-result {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .food-picker-result-controls {
+        width: 100%;
+    }
+
+    .food-picker-result-controls .food-amount-input {
+        flex: 1;
+    }
+
+    .food-picker-result-controls .secondary-button {
+        flex: 0 0 auto;
     }
 
     .macro-overview-item {

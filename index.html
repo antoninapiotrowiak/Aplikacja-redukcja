@@ -35,6 +35,32 @@
                 <div class="stat-pill"><span class="muted">Zjedzone dzisiaj</span><strong id="profileCalories">0 kcal</strong></div>
                 <div class="stat-pill"><span class="muted">Dzisiejszy cel</span><strong id="profileCalorieGoal">2000 kcal</strong></div>
             </div>
+            <section class="dashboard-mini-widgets" aria-label="Szybki podgląd dnia">
+                <div class="dashboard-mini-widget">
+                    <div class="dashboard-mini-widget-heading">
+                        <span>Kalorie</span>
+                        <strong><span id="widgetCalories">0</span> <small>kcal</small></strong>
+                    </div>
+                    <p class="muted">z <span id="widgetCalorieGoal">2000</span> kcal</p>
+                    <div class="progress-track" role="progressbar" aria-label="Kalorie zjedzone względem celu" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-fill" id="widgetCalorieProgress" style="width:0%"></div>
+                    </div>
+                </div>
+                <div class="dashboard-mini-widget">
+                    <div class="dashboard-mini-widget-heading">
+                        <span>Woda</span>
+                        <strong><span id="widgetWater">0</span> <small>ml</small></strong>
+                    </div>
+                    <p class="muted">cel <span id="widgetWaterGoal">2000</span> ml</p>
+                    <div class="progress-track" role="progressbar" aria-label="Woda wypita względem celu" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-fill" id="widgetWaterProgress" style="width:0%"></div>
+                    </div>
+                    <div class="dashboard-water-actions">
+                        <button class="secondary-button" type="button" data-home-water-add="250">+250 ml</button>
+                        <button class="secondary-button" type="button" data-home-water-add="500">+500 ml</button>
+                    </div>
+                </div>
+            </section>
             <a class="primary-button" href="posilki.html" style="display:block;text-align:center;text-decoration:none">Otwórz dziennik</a>
         </section>
 
@@ -64,6 +90,13 @@
                 <p id="weightMessage" class="muted" aria-live="polite" style="margin:10px 0 0"></p>
             </form>
             <div id="weightHistory" style="margin-top:12px"></div>
+            <section class="weight-trend" aria-labelledby="weightTrendTitle">
+                <p class="eyebrow" style="margin:0">Ostrożna analiza</p>
+                <h3 id="weightTrendTitle">Trend masy ciała</h3>
+                <p id="weightTrendMessage" class="muted" aria-live="polite"></p>
+                <button class="secondary-button" id="acceptCalorieSuggestion" type="button" hidden></button>
+                <p class="weight-trend-disclaimer">To orientacyjna wskazówka oparta na zapisanych pomiarach, nie diagnoza ani porada medyczna. Cel zmieni się dopiero po Twoim potwierdzeniu.</p>
+            </section>
         </section>
 
         <section class="card fasting-card" aria-labelledby="fastingTitle">
