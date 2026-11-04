@@ -6,256 +6,56 @@
     <link rel="icon" type="image/png" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Posiłki - Aplikacja Fitness 🍽️</title>
-    <style>
-        :root {
-            --primary: #4a90e2;
-            --primary-light: #edf4f8;
-            --text: #2c3e50;
-            --bg: #f4f7f9;
-            --card-bg: #ffffff;
-            --accent: #2ecc71;
-            --border: #e1e8ed;
-        }
-
-        body.dark-mode {
-            --primary: #5c9ded;
-            --primary-light: #1e293b;
-            --text: #f1f5f9;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #34d399;
-            --border: #334155;
-        }
-
-        body.dark-mode input, body.dark-mode select {
-            background: #0f172a;
-            color: #f1f5f9;
-            border-color: var(--border);
-        }
-
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 15px;
-            max-width: 500px;
-            margin: 0 auto;
-            transition: background 0.3s ease, color 0.3s ease;
-        }
-
-        .user-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 10px 15px;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        }
-
-        .top-nav {
-            display: flex;
-            justify-content: space-around;
-            background: var(--card-bg);
-            padding: 10px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: #7a8b99;
-            font-weight: 700;
-            font-size: 0.8rem;
-            padding: 6px 8px;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        }
-
-        h2 {
-            font-size: 1.1rem;
-            margin-top: 0;
-            margin-bottom: 12px;
-            color: var(--text);
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text);
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        .btn-main {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .meal-card-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            background: var(--primary-light);
-            border-radius: 10px;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            border: 1px solid var(--border);
-        }
-    </style>
+    <meta name="theme-color" content="#4caf5b">
+    <title>Dziennik — Moje posiłki</title>
+    <link rel="stylesheet" href="app.css">
+    <script src="app.js" defer></script>
+    <script src="diary.js" defer></script>
 </head>
-<body>
+<body class="app-page">
+    <header class="app-header">
+        <h1 class="page-title" style="margin:0">Dziennik</h1>
+        <div class="header-actions">
+            <button class="icon-button" type="button" onclick="toggleDarkMode()" aria-label="Przełącz motyw">☾</button>
+            <button class="icon-button" id="calendarToggle" type="button" aria-label="Wybierz datę">▦</button>
+            <img class="profile-avatar" src="icon.png" alt="Awatar profilu">
+        </div>
+    </header>
 
-    <!-- PASEK UŻYTKOWNIKA -->
-    <div class="user-bar">
-        <div style="font-weight: 700; font-size: 0.85rem;">🍽️ Rejestr Posiłków i Kategorie</div>
-        <button onclick="toggleDarkMode()" style="background:none; border:none; cursor:pointer; font-size:1.1rem;" title="Przełącz motyw">🌙</button>
-    </div>
+    <main class="page-content">
+        <div class="date-toolbar">
+            <button id="previousDay" type="button" aria-label="Poprzedni dzień">‹</button>
+            <div class="date-current">
+                <p class="eyebrow" style="margin:0">Dzienny dziennik</p>
+                <strong id="selectedDateLabel"></strong>
+            </div>
+            <button id="nextDay" type="button" aria-label="Następny dzień">›</button>
+        </div>
+        <input class="form-control calendar-input" id="datePicker" type="date" aria-label="Wybierz datę" hidden>
+        <div class="week-strip" id="weekStrip" aria-label="Wybierz dzień tygodnia"></div>
 
-    <!-- NAWIGACJA -->
-    <nav class="top-nav">
-        <a href="index.html" class="nav-link">🏠 Główna</a>
-        <a href="posilki.html" class="nav-link active">🍽️ Posiłki</a>
-        <a href="trening.html" class="nav-link">⏱️ Trening</a>
-        <a href="statystyki.html" class="nav-link">📊 Staty</a>
-        <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
+        <section class="card" id="calories">
+            <div class="calorie-summary">
+                <span class="muted">Kalorii do spożycia</span><strong id="goalDisplay">2000</strong>
+                <span class="muted">Ilość spożytych kalorii</span><strong id="eatenDisplay">0</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-label="Dzienne spożycie kalorii" aria-valuemin="0" aria-valuemax="100" style="margin-top:16px">
+                <div class="progress-fill" id="calorieProgress" style="width:0%"></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px">
+                <span class="muted" id="remainingDisplay">Pozostało: 2000 kcal</span>
+                <button class="secondary-button" id="changeGoal" type="button">Zmień cel</button>
+            </div>
+        </section>
+
+        <div id="mealCards"></div>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Główna nawigacja">
+        <a href="index.html"><span class="nav-icon" aria-hidden="true">◉</span>Ja</a>
+        <a href="posilki.html" aria-current="page"><span class="nav-icon" aria-hidden="true">♨</span>Dziennik</a>
+        <a href="statystyki.html"><span class="nav-icon" aria-hidden="true">▥</span>Raporty</a>
+        <a href="trening.html"><span class="nav-icon" aria-hidden="true">🏃</span>Ćwiczenia</a>
     </nav>
-
-    <!-- DODAWANIE POSIŁKU Z KATEGORIĄ -->
-    <div class="card">
-        <h2>Dodaj Posiłek</h2>
-        <select id="mealCategory">
-            <option value="Śniadanie">☀️ Śniadanie</option>
-            <option value="Obiad">🍲 Obiad</option>
-            <option value="Kolacja">🌙 Kolacja</option>
-            <option value="Przekąska">🍎 Przekąska / Inne</option>
-        </select>
-        <input type="text" id="mealName" placeholder="Nazwa posiłku (np. Owsianka)">
-        <input type="number" id="mealKcal" placeholder="Kalorie (kcal)">
-        <button class="btn-main" onclick="addMeal()">Dodaj do bilansu</button>
-    </div>
-
-    <!-- DZISIEJSZE POSIŁKI PODZIELONE NA KATEGORIE -->
-    <div class="card">
-        <h2>Dzisiejsze Posiłki</h2>
-        <div id="mealsList" style="font-size: 0.85rem; color: #7a8b99;">
-            Brak zapisanego jedzenia na dziś.
-        </div>
-        <div id="totalKcal" style="margin-top: 15px; font-weight: 700; font-size: 0.9rem; text-align: right; color: var(--text);">
-            Suma: 0 kcal
-        </div>
-    </div>
-
-        <script>
-        // Tryb ciemny
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-        }
-
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-        }
-
-        // Dodawanie posiłku
-        function addMeal() {
-            const category = document.getElementById('mealCategory').value;
-            const name = document.getElementById('mealName').value;
-            const kcal = document.getElementById('mealKcal').value;
-            
-            if(!name || !kcal) return alert('Wpisz nazwę i kalorie!');
-
-            const todayStr = new Date().toISOString().split('T')[0];
-            let meals = JSON.parse(localStorage.getItem(`meals_${todayStr}`) || '[]');
-            meals.push({id: Date.now(), category, name, kcal: parseInt(kcal)});
-            localStorage.setItem(`meals_${todayStr}`, JSON.stringify(meals));
-
-            document.getElementById('mealName').value = '';
-            document.getElementById('mealKcal').value = '';
-            loadMeals();
-        }
-
-        // Usuwanie pojedynczego posiłku
-        function deleteMeal(id) {
-            const todayStr = new Date().toISOString().split('T')[0];
-            let meals = JSON.parse(localStorage.getItem(`meals_${todayStr}`) || '[]');
-            meals = meals.filter(m => m.id !== id);
-            localStorage.setItem(`meals_${todayStr}`, JSON.stringify(meals));
-            loadMeals();
-        }
-
-        // Ładowanie i grupowanie posiłków
-        function loadMeals() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            let meals = JSON.parse(localStorage.getItem(`meals_${todayStr}`) || '[]');
-            const listEl = document.getElementById('mealsList');
-            const totalEl = document.getElementById('totalKcal');
-            
-            if(meals.length === 0) {
-                listEl.innerHTML = 'Brak zapisanego jedzenia na dziś.';
-                totalEl.innerHTML = 'Suma: 0 kcal';
-                // Synchronizacja z głównym widokiem (0 kcal)
-                localStorage.setItem('todayConsumedKcal', '0');
-                return;
-            }
-
-            let total = 0;
-            const categories = ['Śniadanie', 'Obiad', 'Kolacja', 'Przekąska'];
-            let html = '';
-
-            categories.forEach(cat => {
-                const catMeals = meals.filter(m => m.category === cat);
-                if (catMeals.length > 0) {
-                    html += `<div style="font-weight:700; margin-top:10px; margin-bottom:5px; color:var(--primary);">${cat}:</div>`;
-                    catMeals.forEach(m => {
-                        total += m.kcal;
-                        html += `
-                            <div class="meal-card-item" style="display:flex; justify-content:space-between; align-items:center; background:var(--primary-light); padding:8px 12px; border-radius:10px; margin-bottom:6px; border:1px solid var(--border);">
-                                <div><b>${m.name}</b> (${m.kcal} kcal)</div>
-                                <button onclick="deleteMeal(${m.id})" style="background:none; border:none; cursor:pointer;" title="Usuń">🗑️</button>
-                            </div>
-                        `;
-                    });
-                }
-            });
-
-            listEl.innerHTML = html;
-            totalEl.innerHTML = `Suma: <b>${total}</b> kcal`;
-
-            // KLUCZOWY KROK: Zapisujemy sumę do klucza, który czyta strona główna!
-            localStorage.setItem('todayConsumedKcal', total);
-        }
-
-        loadMeals();
-    </script>
-
 </body>
 </html>

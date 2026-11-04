@@ -177,8 +177,10 @@
             color: var(--text);
         }
     </style>
+    <link rel="stylesheet" href="app.css">
+    <script src="app.js" defer></script>
 </head>
-<body>
+<body class="app-page legacy-page">
 
     <!-- PASEK UŻYTKOWNIKA -->
     <div class="user-bar">
@@ -187,12 +189,11 @@
     </div>
 
     <!-- NAWIGACJA -->
-    <nav class="top-nav">
-        <a href="./index.html" class="nav-link">🏠 Główna</a>
-        <a href="./posilki.html" class="nav-link">🍽️ Posiłki</a>
-        <a href="./trening.html" class="nav-link">⏱️ Trening</a>
-        <a href="./statystyki.html" class="nav-link">📊 Staty</a>
-        <a href="./przepisy.html" class="nav-link active">🥗 Przepisy</a>
+    <nav class="bottom-nav" aria-label="Główna nawigacja">
+        <a href="index.html"><span class="nav-icon" aria-hidden="true">◉</span>Ja</a>
+        <a href="posilki.html"><span class="nav-icon" aria-hidden="true">♨</span>Dziennik</a>
+        <a href="statystyki.html"><span class="nav-icon" aria-hidden="true">▥</span>Raporty</a>
+        <a href="trening.html"><span class="nav-icon" aria-hidden="true">🏃</span>Ćwiczenia</a>
     </nav>
 
         <!-- KALKULATOR SKŁADNIKÓW I KALORII -->

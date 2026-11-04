@@ -6,581 +6,91 @@
     <link rel="icon" type="image/png" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikacja Fitness 🌟</title>
-    <style>
-        :root {
-            --primary: #4a90e2;
-            --primary-light: #edf4f8;
-            --text: #2c3e50;
-            --bg: #f4f7f9;
-            --card-bg: #ffffff;
-            --accent: #2ecc71;
-            --border: #e1e8ed;
-        }
-
-        body.dark-mode {
-            --primary: #5c9ded;
-            --primary-light: #1e293b;
-            --text: #f1f5f9;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #34d399;
-            --border: #334155;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 15px;
-            max-width: 500px;
-            margin: 0 auto;
-            transition: background 0.3s ease, color 0.3s ease;
-        }
-
-        .user-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 10px 15px;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        }
-
-        .btn-google {
-            background: #4285F4;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .top-nav {
-            display: flex;
-            justify-content: space-around;
-            background: var(--card-bg);
-            padding: 12px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: #7a8b99;
-            font-weight: 700;
-            font-size: 0.85rem;
-            padding: 8px 10px;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        }
-
-        h2 {
-            font-size: 1.1rem;
-            margin-top: 0;
-            margin-bottom: 12px;
-            color: var(--text);
-        }
-
-        .progress-bar-bg {
-            background: var(--border);
-            height: 16px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 12px 0;
-        }
-
-        .progress-bar-fill {
-            background: var(--primary);
-            height: 100%;
-            width: 0%;
-            border-radius: 10px;
-            transition: width 0.4s ease, background-color 0.4s ease;
-        }
-
-        input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-            background: var(--card-bg);
-            color: var(--text);
-        }
-
-        .btn-main {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            background: var(--primary);
-            color: white;
-            font-weight: 800;
-            font-size: 0.85rem;
-            cursor: pointer;
-            margin-bottom: 8px;
-        }
-
-        .history-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            background: var(--primary-light);
-            border-radius: 8px;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-            border: 1px solid var(--border);
-        }
-    </style>
+    <meta name="theme-color" content="#4caf5b">
+    <title>Ja — Mój Dziennik</title>
+    <link rel="stylesheet" href="app.css">
+    <script src="app.js" defer></script>
+    <script src="profile.js" defer></script>
 </head>
-<body>
-
-    <!-- PASEK UŻYTKOWNIKA -->
-    <div class="user-bar">
-        <div id="userInfo" style="font-weight: 700; font-size: 0.85rem; color: var(--text);">
-            🔒 Niezalogowano
+<body class="app-page">
+    <header class="app-header">
+        <h1 class="page-title" style="margin:0">Ja</h1>
+        <div class="header-actions">
+            <button class="icon-button" type="button" onclick="toggleDarkMode()" aria-label="Przełącz motyw">☾</button>
+            <img class="profile-avatar" src="icon.png" alt="Awatar profilu">
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-            <button onclick="toggleDarkMode()" style="background:none; border:none; cursor:pointer; font-size:1.1rem;" title="Przełącz motyw">🌙</button>
-            <button id="authBtn" class="btn-google" onclick="handleAuth()">Zaloguj z Google</button>
-        </div>
-    </div>
+    </header>
 
-    <!-- NAWIGACJA -->
-    <nav class="top-nav" style="display: flex; justify-content: space-around; gap: 4px; overflow-x: auto;">
-        <a href="index.html" class="nav-link active">🏠 Główna</a>
-        <a href="posilki.html" class="nav-link">🍽️ Posiłki</a>
-        <a href="trening.html" class="nav-link">⏱️ Trening</a>
-        <a href="statystyki.html" class="nav-link">📊 Staty</a>
-        <a href="przepisy.html" class="nav-link">🥗 Przepisy</a>
-    </nav>
+    <main class="page-content">
+        <section class="card">
+            <div class="profile-summary">
+                <img class="profile-avatar" src="icon.png" alt="">
+                <div>
+                    <p class="eyebrow">Mój profil</p>
+                    <h2 class="profile-name">Twoja droga do celu</h2>
+                    <p class="muted" style="margin:0">Małe kroki, regularne postępy.</p>
+                </div>
+            </div>
+            <div class="stat-pills">
+                <div class="stat-pill"><span class="muted">Zjedzone dzisiaj</span><strong id="profileCalories">0 kcal</strong></div>
+                <div class="stat-pill"><span class="muted">Dzisiejszy cel</span><strong id="profileCalorieGoal">2000 kcal</strong></div>
+            </div>
+            <a class="primary-button" href="posilki.html" style="display:block;text-align:center;text-decoration:none">Otwórz dziennik</a>
+        </section>
 
-    <!-- KARTA POWIADOMIEŃ AUTOMATYCZNYCH -->
-    <div class="card">
-        <h2>🔔 Automatyczne Przypomnienia</h2>
-        <p style="font-size:0.8rem; color:#7a8b99; margin-bottom:12px;">
-            Włącz automatyczne przypomnienia (posiłki: 9:00, 15:00, 19:00 oraz trening: 16:00-20:00).
-        </p>
-        <button id="notifToggleBtn" class="btn-main" onclick="requestNotificationPermission()">⚡ Włącz przypomnienia</button>
-        <div id="notifStatus" style="font-size:0.8rem; color:var(--accent); font-weight:700; display:none; margin-top:8px;">
-            ✅ Automatyczne przypomnienia są aktywne!
-        </div>
-    </div>
-
-    <!-- NASTROJOMETR -->
-    <div class="card">
-        <h2>✨ Jak się dzisiaj czujesz?</h2>
-        <div style="display: flex; justify-content: space-around; font-size: 1.8rem; margin: 15px 0; cursor: pointer;">
-            <span onclick="saveMood('🤩', 'Świetnie')" title="Świetnie">🤩</span>
-            <span onclick="saveMood('😊', 'Dobrze')" title="Dobrze">😊</span>
-            <span onclick="saveMood('😐', 'Neutralnie')" title="Neutralnie">😐</span>
-            <span onclick="saveMood('🥱', 'Zmęczenie')" title="Zmęczenie">🥱</span>
-            <span onclick="saveMood('🌧️', 'Stres / Słabiej')" title="Stres">🌧️</span>
-        </div>
-        <div id="moodStatus" style="text-align: center; font-size: 0.85rem; color: #7a8b99; font-weight: 600;">
-            Nie wybrano jeszcze nastroju na dziś.
-        </div>
-    </div>
-
-    <!-- CELE I PASEK POSTĘPU KALORII -->
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>🎯 Cel Kaloryczny</h2>
-            <button onclick="setCalorieGoal()" style="background:none; border:none; color:var(--primary); font-weight:700; cursor:pointer; font-size:0.8rem;">⚙️ Zmień cel</button>
-        </div>
-
-        <div style="font-size: 1.4rem; font-weight: 800; margin-top: 5px;">
-            <span id="currentKcalDisplay">0</span> / <span id="goalKcalDisplay">2000</span> kcal
-        </div>
-
-        <div class="progress-bar-bg">
-            <div id="kcalProgressBar" class="progress-bar-fill"></div>
-        </div>
-
-        <div style="font-size: 0.85rem; color: #7a8b99; font-weight: 600;" id="kcalStatusText">
-            Zostało: 2000 kcal
-        </div>
-    </div>
-
-    <!-- ŚLEDZIK WAGI I WYMIARÓW -->
-    <div class="card">
-        <h2>📈 Waga i Wymiary</h2>
-        <div style="display: flex; gap: 8px;">
-            <input type="number" id="weightInput" step="0.1" placeholder="Waga (kg)">
-            <input type="number" id="waistInput" placeholder="Talia (cm)">
-        </div>
-        <button class="btn-main" onclick="saveMeasurement()">💾 Zapisz pomiar</button>
-
-        <div id="measurementsHistory" style="margin-top: 15px;"></div>
-    </div>
-
-    <!-- SKRYPT INTERFEJSU I AUTOMATYZACJI -->
-    <script>
-        function checkDayReset() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const lastActiveDay = localStorage.getItem('lastActiveDay');
-
-            if (lastActiveDay !== todayStr) {
-                localStorage.removeItem('breakfast_' + lastActiveDay);
-                localStorage.removeItem('lunch_' + lastActiveDay);
-                localStorage.removeItem('dinner_' + lastActiveDay);
-                localStorage.removeItem('workout_' + lastActiveDay);
-                localStorage.setItem('lastActiveDay', todayStr);
-            }
-        }
-        checkDayReset();
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-        }
-
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-        }
-
-        function saveMood(emoji, label) {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const moodData = { emoji, label, date: todayStr };
-            localStorage.setItem(`mood_${todayStr}`, JSON.stringify(moodData));
-            updateMoodUI();
-        }
-
-        function updateMoodUI() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const savedMood = localStorage.getItem(`mood_${todayStr}`);
-            const statusDiv = document.getElementById('moodStatus');
-
-            if (!statusDiv) return;
-
-            if (savedMood) {
-                const mood = JSON.parse(savedMood);
-                statusDiv.innerHTML = `Dzisiejszy wybór: <span style="font-size:1.2rem;">${mood.emoji}</span> <b>${mood.label}</b>`;
-            } else {
-                statusDiv.innerHTML = 'Nie wybrano jeszcze nastroju na dziś.';
-            }
-        }
-        updateMoodUI();
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker zarejestrowany!'))
-                .catch(err => console.error('Błąd rejestracji SW:', err));
-        }
-
-        async function requestNotificationPermission() {
-            if (!('Notification' in window)) {
-                alert('Twoja przeglądarka nie obsługuje powiadomień.');
-                return;
-            }
-
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                updateNotifUI();
-                checkMealReminders();
-            } else if (permission === 'denied') {
-                alert('Powiadomienia zostały zablokowane w ustawieniach.');
-            }
-        }
-
-        function updateNotifUI() {
-            const btn = document.getElementById('notifToggleBtn');
-            const status = document.getElementById('notifStatus');
-            if (Notification.permission === 'granted') {
-                if (btn) btn.style.display = 'none';
-                if (status) status.style.display = 'block';
-            }
-        }
-
-        async function sendMealNotification(title, body, targetUrl = '/posilki.html') {
-            if (Notification.permission === 'granted' && navigator.serviceWorker.ready) {
-                const reg = await navigator.serviceWorker.ready;
-                reg.showNotification(title, {
-                    body: body,
-                    vibrate: [200, 100, 200],
-                    requireInteraction: true,
-                    data: { url: targetUrl },
-                    actions: [
-                        { action: 'open-app', title: '🚀 Otwórz aplikację' }
-                    ]
-                });
-            }
-        }
-
-        function checkMealReminders() {
-            if (Notification.permission !== 'granted') return;
-
-            const now = new Date();
-            const currentHour = now.getHours();
-            const todayStr = now.toISOString().split('T')[0];
-
-            if (currentHour >= 9 && currentHour < 15) {
-                if (!localStorage.getItem(`breakfast_${todayStr}`)) {
-                    sendMealNotification('Czas na śniadanie! 🥣', 'Nie uzupełniłaś jeszcze dzisiejszego śniadania!', '/posilki.html');
-                }
-            }
-
-            if (currentHour >= 15 && currentHour < 19) {
-                if (!localStorage.getItem(`lunch_${todayStr}`)) {
-                    sendMealNotification('Czas na obiad! 🍲', 'Pora na obiad! Uzupełnij kalorie w aplikacji.', '/posilki.html');
-                }
-            }
-
-            if (currentHour >= 19) {
-                if (!localStorage.getItem(`dinner_${todayStr}`)) {
-                    sendMealNotification('Czas na kolację! 🥗', 'Zapisz swój ostatni posiłek na dziś!', '/posilki.html');
-                }
-            }
-
-            if (currentHour >= 16 && currentHour <= 20) {
-                if (!localStorage.getItem(`workout_${todayStr}`)) {
-                    sendMealNotification('Czas na trening! ⏱️', 'Czas ruszyć się z miejsca! Zrób dzisiejszy trening.', '/trening.html');
-                }
-            }
-        }
-
-        setInterval(checkMealReminders, 3600000);
-
-        let calorieGoal = parseInt(localStorage.getItem('userCalorieGoal')) || 2000;
-
-        function updateCalorieUI() {
-            const todayKcal = parseInt(localStorage.getItem('todayCalories')) || 0;
-            const currentDisplay = document.getElementById('currentKcalDisplay');
-            const goalDisplay = document.getElementById('goalKcalDisplay');
-
-            if (currentDisplay) currentDisplay.textContent = todayKcal;
-            if (goalDisplay) goalDisplay.textContent = calorieGoal;
-
-            const percent = Math.min(Math.round((todayKcal / calorieGoal) * 100), 100);
-            const bar = document.getElementById('kcalProgressBar');
-            if (bar) bar.style.width = percent + '%';
-
-            const remaining = calorieGoal - todayKcal;
-            const status = document.getElementById('kcalStatusText');
-
-            if (status && bar) {
-                if (remaining > 0) {
-                    status.textContent = `Pozostało do wykorzystania: ${remaining} kcal`;
-                    bar.style.backgroundColor = '#4a90e2';
-                } else if (remaining === 0) {
-                    status.textContent = `Idealnie! Osiągnięto dzisiejszy cel! 🎉`;
-                    bar.style.backgroundColor = '#2ecc71';
-                } else {
-                    status.textContent = `Przekroczono cel o ${Math.abs(remaining)} kcal ⚡`;
-                    bar.style.backgroundColor = '#e74c3c';
-                }
-            }
-        }
-
-        function setCalorieGoal() {
-            const newGoal = prompt("Wpisz swój dzienny cel kalorii (kcal):", calorieGoal);
-            if (newGoal && !isNaN(newGoal) && newGoal > 0) {
-                calorieGoal = parseInt(newGoal);
-                localStorage.setItem('userCalorieGoal', calorieGoal);
-                updateCalorieUI();
-            }
-        }
-
-        function handleAuth() {
-            if (window.currentUser) {
-                if (typeof window.wylogujZGoogle === "function") window.wylogujZGoogle();
-            } else {
-                if (typeof window.zalogujZGoogle === "function") window.zalogujZGoogle();
-            }
-        }
-
-        function saveMeasurement() {
-            if (!window.currentUser) {
-                alert("Zaloguj się przez Google, aby zapisywać swoje pomiary!");
-                return;
-            }
-
-            const weight = document.getElementById('weightInput').value;
-            const waist = document.getElementById('waistInput').value;
-
-            if (!weight && !waist) {
-                alert("Wpisz przynajmniej wagę lub obwód talii!");
-                return;
-            }
-
-            if (typeof window.zapiszPomiarDoFirebase === "function") {
-                window.zapiszPomiarDoFirebase(weight, waist);
-            }
-
-            document.getElementById('weightInput').value = '';
-            document.getElementById('waistInput').value = '';
-        }
-
-        function renderMeasurements(data = []) {
-            const container = document.getElementById('measurementsHistory');
-            if (!container) return;
-
-            container.innerHTML = '';
-
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#a0b2bc; font-size:0.8rem;">Brak zapisanych pomiarów ☁️</p>';
-                return;
-            }
-
-            data.forEach((m) => {
-                container.innerHTML += `
-                    <div class="history-row">
-                        <strong style="color:var(--primary);">${m.date}</strong>
-                        <span>${m.weight ? '⚖️ ' + m.weight + ' kg' : ''} ${m.waist ? '📏 ' + m.waist + ' cm' : ''}</span>
-                        <button onclick="deleteMeasurement('${m.id}')" style="background:none; border:none; cursor:pointer;">🗑️</button>
+        <section class="card">
+            <p class="eyebrow">Twoje postępy</p>
+            <h2>Moja waga</h2>
+            <div class="weight-range">
+                <span>Start: <span id="startingWeight">—</span></span>
+                <strong id="currentWeight">—</strong>
+                <span>Cel: <span id="targetWeight">—</span></span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-label="Postęp do celu wagowego" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-fill" id="weightProgress" style="width:0%"></div>
+            </div>
+            <form id="weightForm" style="margin-top:18px">
+                <div class="form-grid">
+                    <div class="field">
+                        <label class="field-label" for="weightInput">Zapisz wagę (kg)</label>
+                        <input class="form-control" id="weightInput" name="weight" type="number" min="1" max="500" step="0.1" inputmode="decimal" placeholder="np. 70,5">
                     </div>
-                `;
-            });
-        }
+                    <div class="field">
+                        <label class="field-label" for="weightTargetInput">Cel wagowy (kg)</label>
+                        <input class="form-control" id="weightTargetInput" name="target" type="number" min="1" max="500" step="0.1" inputmode="decimal" placeholder="Ustaw cel">
+                    </div>
+                </div>
+                <button class="secondary-button" type="submit" style="width:100%;margin-top:12px">Zapisz postępy</button>
+                <p id="weightMessage" class="muted" aria-live="polite" style="margin:10px 0 0"></p>
+            </form>
+            <div id="weightHistory" style="margin-top:12px"></div>
+        </section>
 
-        function deleteMeasurement(id) {
-            if (typeof window.usunPomiarZFirebase === "function") {
-                window.usunPomiarZFirebase(id);
-            }
-        }
+        <section class="card settings-list" aria-label="Ustawienia i skróty">
+            <a class="settings-link" href="index.html#weightForm">
+                <span class="settings-icon" aria-hidden="true">⚖</span>
+                <span style="flex:1">Moja waga</span><span class="muted" aria-hidden="true">›</span>
+            </a>
+            <a class="settings-link" href="posilki.html#calories">
+                <span class="settings-icon" aria-hidden="true">◎</span>
+                <span style="flex:1">Moje kalorie i cele</span><span class="muted" aria-hidden="true">›</span>
+            </a>
+            <a class="settings-link" href="statystyki.html">
+                <span class="settings-icon" aria-hidden="true">☆</span>
+                <span style="flex:1">Moje podsumowanie</span><span class="muted" aria-hidden="true">›</span>
+            </a>
+            <a class="settings-link" href="przepisy.html">
+                <span class="settings-icon" aria-hidden="true">▤</span>
+                <span style="flex:1">Przepisy i kalkulator</span><span class="muted" aria-hidden="true">›</span>
+            </a>
+        </section>
+    </main>
 
-        updateCalorieUI();
-        updateNotifUI();
-    </script>
-
-    <!-- MODULE FIREBASE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-        import { 
-            getAuth, 
-            signInWithPopup, 
-            GoogleAuthProvider, 
-            signOut, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            addDoc, 
-            onSnapshot, 
-            deleteDoc, 
-            doc,
-            query,
-            where
-        } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAlD9a5WqfBIYWLh4okyGSI8AY1obeox50",
-            authDomain: "mojaaplikacja-6bfaa.firebaseapp.com",
-            projectId: "mojaaplikacja-6bfaa",
-            storageBucket: "mojaaplikacja-6bfaa.firebasestorage.app",
-            messagingSenderId: "586745068789",
-            appId: "1:024245da595f9a11b299bc",
-            measurementId: "G-M0K7DTZRN1"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-
-        let unsubscribeSnapshot = null;
-
-        window.zalogujZGoogle = async function() {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error("Błąd logowania:", error);
-                alert("Nie udało się zalogować: " + error.message);
-            }
-        };
-
-        window.wylogujZGoogle = async function() {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Błąd wylogowania:", error);
-            }
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            const userInfo = document.getElementById('userInfo');
-            const authBtn = document.getElementById('authBtn');
-
-            if (user) {
-                window.currentUser = user;
-                userInfo.innerHTML = `👤 ${user.displayName || 'Zalogowano'}`;
-                authBtn.textContent = 'Wyloguj';
-                authBtn.style.background = '#e74c3c';
-
-                const q = query(collection(db, "pomiary"), where("userId", "==", user.uid));
-                
-                if (unsubscribeSnapshot) unsubscribeSnapshot();
-                
-                unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
-                    let firebaseMeasurements = [];
-                    snapshot.forEach((doc) => {
-                        firebaseMeasurements.push({ id: doc.id, ...doc.data() });
-                    });
-
-                    firebaseMeasurements.sort((a, b) => (b.created || 0) - (a.created || 0));
-                    renderMeasurements(firebaseMeasurements);
-                });
-
-            } else {
-                window.currentUser = null;
-                userInfo.innerHTML = '🔒 Niezalogowano';
-                authBtn.textContent = 'Zaloguj z Google';
-                authBtn.style.background = '#4285F4';
-
-                if (unsubscribeSnapshot) unsubscribeSnapshot();
-                renderMeasurements([]);
-            }
-        });
-
-        window.zapiszPomiarDoFirebase = async function(weight, waist) {
-            if (!window.currentUser) return;
-
-            try {
-                const dateStr = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
-                await addDoc(collection(db, "pomiary"), {
-                    userId: window.currentUser.uid,
-                    date: dateStr,
-                    weight: weight,
-                    waist: waist,
-                    created: new Date().getTime()
-                });
-            } catch (e) {
-                console.error("Błąd zapisu:", e);
-            }
-        };
-
-        window.usunPomiarZFirebase = async function(id) {
-            try {
-                await deleteDoc(doc(db, "pomiary", id));
-            } catch (e) {
-                console.error("Błąd usuwania:", e);
-            }
-        };
-    </script>
+    <nav class="bottom-nav" aria-label="Główna nawigacja">
+        <a href="index.html" aria-current="page"><span class="nav-icon" aria-hidden="true">◉</span>Ja</a>
+        <a href="posilki.html"><span class="nav-icon" aria-hidden="true">♨</span>Dziennik</a>
+        <a href="statystyki.html"><span class="nav-icon" aria-hidden="true">▥</span>Raporty</a>
+        <a href="trening.html"><span class="nav-icon" aria-hidden="true">🏃</span>Ćwiczenia</a>
+    </nav>
 </body>
 </html>
