@@ -82,6 +82,15 @@
         return Number.isFinite(number) ? number : null;
     }
 
+    function servingWord(count) {
+        if (count === 1) return 'porcja';
+        const lastDigit = count % 10;
+        const lastTwoDigits = count % 100;
+        if (Number.isInteger(count) && lastDigit >= 2 && lastDigit <= 4 &&
+            (lastTwoDigits < 12 || lastTwoDigits > 14)) return 'porcje';
+        return 'porcji';
+    }
+
     function setActiveFilter(filter) {
         activeFilter = filter;
         document.querySelectorAll('.recipe-filter').forEach((button) => {
@@ -102,7 +111,6 @@
         const cover = document.createElement('div');
         cover.className = `recipe-card-cover${recipe.isUserRecipe ? ' recipe-card-cover-own' : ''}`;
         cover.setAttribute('aria-hidden', 'true');
-        cover.textContent = recipe.isUserRecipe ? '♨' : '✳';
         const favorite = document.createElement('button');
         favorite.className = `recipe-favorite${favorites.includes(recipe.id) ? ' is-favorite' : ''}`;
         favorite.type = 'button';
@@ -185,11 +193,14 @@
         const servings = Number(servingsInput.value) || 1;
         document.getElementById('recipeDialogTitle').textContent = activeRecipe.title;
         document.getElementById('recipeDetailSummary').textContent =
-            `${activeRecipe.time} min przygotowania · ${activeRecipe.isUserRecipe ? `${activeRecipe.originalServings} porcje w przepisie` : '1 porcja w przepisie'}`;
+            `${activeRecipe.time} min przygotowania · ${recipeYield} ${servingWord(recipeYield)} w przepisie`;
         const hasMacros = ['protein', 'fat', 'carbs'].some((key) => numberOrNull(activeRecipe.macros?.[key]) !== null);
         document.getElementById('recipeDetailNote').textContent = hasMacros
-            ? 'Wartości są podane na jedną porcję. Zmiana liczby porcji przelicza podsumowanie.'
-            : 'Kalorie podano na jedną porcję. Pozostałe wartości odżywcze nie zostały podane.';
+            ? `Wartości ${activeRecipe.isUserRecipe ? 'wpisano' : 'podano'} na jedną porcję. Zmiana liczby porcji przelicza podsumowanie.`
+            : `${activeRecipe.isUserRecipe ? 'Kalorie wpisano' : 'Kalorie są orientacyjne'} na jedną porcję. Pozostałe wartości odżywcze nie zostały podane.`;
+        const recipeYield = activeRecipe.originalServings || 1;
+        document.getElementById('recipeIngredientsTitle').textContent =
+            `Składniki · ${recipeYield} ${servingWord(recipeYield)}`;
 
         const ingredients = document.getElementById('recipeIngredients');
         ingredients.replaceChildren(...(activeRecipe.ingredients || []).map((ingredient) => {
@@ -324,7 +335,7 @@
             id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
             category: document.getElementById('recipeMealCategory').value,
             name: activeRecipe.title,
-            serving: `${FitnessApp.formatNumber(servings)} ${servings === 1 ? 'porcja' : 'porcji'}`,
+            serving: `${FitnessApp.formatNumber(servings)} ${servingWord(servings)}`,
             kcal: Math.round(activeRecipe.kcal * servings),
             protein: numberOrNull(activeRecipe.macros?.protein) === null ? null : activeRecipe.macros.protein * servings,
             fat: numberOrNull(activeRecipe.macros?.fat) === null ? null : activeRecipe.macros.fat * servings,

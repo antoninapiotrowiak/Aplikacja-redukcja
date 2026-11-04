@@ -49,7 +49,7 @@
         const complete = elapsedMs >= targetMs;
 
         document.getElementById('fastingElapsed').textContent = `${hours}:${minutes}:${seconds}`;
-        document.getElementById('fastingSchedule').textContent = `${session.durationHours}: ${24 - session.durationHours} · cel o ${endTime}`;
+        document.getElementById('fastingSchedule').textContent = `${session.durationHours}:${24 - session.durationHours} · cel o ${endTime}`;
         document.getElementById('fastingProgress').style.width = `${percent}%`;
         document.querySelector('[aria-label="Postęp postu"]').setAttribute('aria-valuenow', String(percent));
         status.textContent = complete ? 'Cel minął' : 'W trakcie';
