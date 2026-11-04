@@ -14,10 +14,11 @@
             const date = new Date(monday);
             date.setDate(monday.getDate() + index);
             const meals = FitnessApp.getMeals(FitnessApp.dateKey(date));
+            const nutrition = FitnessApp.summarizeMeals(meals);
             return {
                 date,
                 meals,
-                calories: meals.reduce((sum, meal) => sum + (Number(meal.kcal) || 0), 0)
+                ...nutrition
             };
         });
     }
@@ -79,44 +80,111 @@
     }
 
     function renderMacros() {
-        const goal = Number(localStorage.getItem('userCalorieGoal')) || 2000;
-        const targets = [
-            { name: 'Węglowodany', share: 50, multiplier: 4 },
-            { name: 'Białko', share: 20, multiplier: 4 },
-            { name: 'Tłuszcze', share: 30, multiplier: 9 }
+        const days = getWeekDates();
+        const total = days.reduce((sum, day) => ({
+            protein: sum.protein + day.protein,
+            carbs: sum.carbs + day.carbs,
+            fat: sum.fat + day.fat,
+            trackedProtein: sum.trackedProtein + day.trackedProtein,
+            trackedCarbs: sum.trackedCarbs + day.trackedCarbs,
+            trackedFat: sum.trackedFat + day.trackedFat
+        }), { protein: 0, carbs: 0, fat: 0, trackedProtein: 0, trackedCarbs: 0, trackedFat: 0 });
+        const macroFields = [
+            { key: 'protein', tracked: 'trackedProtein', name: 'Białko', color: '#f5b247' },
+            { key: 'fat', tracked: 'trackedFat', name: 'Tłuszcze', color: '#ef8462' },
+            { key: 'carbs', tracked: 'trackedCarbs', name: 'Węglowodany', color: '#46a9d8' }
         ];
+        const hasAnyData = macroFields.some((field) => total[field.tracked] > 0);
         panel.innerHTML = `
-            <h2>Cele makroskładników</h2>
-            <p class="muted">Podgląd celu dziennego. Dziennik zapisuje obecnie kalorie, dlatego ilość zjedzonych makroskładników nie jest jeszcze dostępna.</p>
+            <h2>Makroskładniki w tym tygodniu</h2>
+            <div class="macro-overview"></div>
+            <p class="muted macro-report-note"></p>
+            <div class="bar-chart macro-chart" aria-label="Makroskładniki w poszczególnych dniach tygodnia"></div>
             <table class="report-table">
-                <thead><tr><th>Makroskładnik</th><th>Cel</th><th>Spożycie</th></tr></thead>
+                <thead><tr><th>Dzień</th><th>Białko</th><th>Tłuszcze</th><th>Węglowodany</th></tr></thead>
                 <tbody></tbody>
             </table>`;
+        const overview = panel.querySelector('.macro-overview');
+        macroFields.forEach((field) => {
+            const item = document.createElement('div');
+            item.className = 'macro-overview-item';
+            const label = document.createElement('span');
+            label.textContent = field.name;
+            const value = document.createElement('strong');
+            value.textContent = total[field.tracked] ? `${FitnessApp.formatNumber(total[field.key])} g` : '—';
+            item.append(label, value);
+            overview.append(item);
+        });
+        panel.querySelector('.macro-report-note').textContent = hasAnyData
+            ? 'Sumy obejmują wyłącznie uzupełnione wartości. Wcześniejsze wpisy bez makro są pomijane.'
+            : 'Brak danych makro w tym tygodniu. Dodaj białko, tłuszcze i węglowodany przy wpisywaniu posiłku.';
+
+        const chart = panel.querySelector('.macro-chart');
+        const maxValue = Math.max(1, ...days.map((day) => day.protein + day.fat + day.carbs));
         const rows = panel.querySelector('tbody');
-        targets.forEach((target) => {
-            const grams = Math.round(goal * target.share / 100 / target.multiplier);
+        days.forEach((day) => {
+            const dayHasData = macroFields.some((field) => day[field.tracked] > 0);
+            const isFuture = day.date > new Date(new Date().setHours(23, 59, 59, 999));
+            const chartItem = document.createElement('div');
+            chartItem.className = 'bar-chart-item';
+            const stack = document.createElement('div');
+            stack.className = 'macro-stack';
+            const amount = day.protein + day.fat + day.carbs;
+            stack.style.height = `${dayHasData ? Math.max(4, Math.round(amount / maxValue * 100)) : 3}%`;
+            macroFields.forEach((field) => {
+                if (!day[field.tracked]) return;
+                const segment = document.createElement('span');
+                segment.className = 'macro-stack-segment';
+                segment.style.flexGrow = String(day[field.key]);
+                segment.style.backgroundColor = field.color;
+                segment.title = `${field.name}: ${FitnessApp.formatNumber(day[field.key])} g`;
+                stack.append(segment);
+            });
+            const dayLabel = document.createElement('span');
+            dayLabel.textContent = FitnessApp.formatDate(day.date, { weekday: 'short' }).replace('.', '');
+            chartItem.append(stack, dayLabel);
+            chart.append(chartItem);
+
             const row = document.createElement('tr');
-            [target.name, `${target.share}% · ${grams} g`, '—'].forEach((value) => {
+            const dateCell = document.createElement('td');
+            dateCell.textContent = FitnessApp.formatDate(day.date, { weekday: 'short', day: 'numeric' });
+            row.append(dateCell);
+            macroFields.forEach((field) => {
                 const cell = document.createElement('td');
-                cell.textContent = value;
+                cell.textContent = isFuture || !day[field.tracked]
+                    ? '—'
+                    : `${FitnessApp.formatNumber(day[field.key])} g`;
                 row.append(cell);
             });
             rows.append(row);
         });
+
+        const legend = document.createElement('div');
+        legend.className = 'macro-legend';
+        macroFields.forEach((field) => {
+            const item = document.createElement('span');
+            const swatch = document.createElement('i');
+            swatch.style.backgroundColor = field.color;
+            item.append(swatch, document.createTextNode(field.name));
+            legend.append(item);
+        });
+        chart.after(legend);
     }
 
     function renderFoods(days) {
         const totals = new Map();
         days.forEach((day) => {
             day.meals.forEach((meal) => {
-                const category = meal.category || 'Inne';
+                const category = meal.category === 'Przekąska'
+                    ? 'Przekąski/Inne'
+                    : meal.category || 'Inne';
                 totals.set(category, (totals.get(category) || 0) + (Number(meal.kcal) || 0));
             });
         });
 
         panel.innerHTML = `
-            <h2>Podsumowanie posiłków</h2>
-            <p class="muted">Suma kalorii zarejestrowanych posiłków z wybranego tygodnia.</p>
+            <h2>Kalorie według posiłków</h2>
+            <p class="muted">Rozkład energii zarejestrowanej w każdej części dnia.</p>
             <table class="report-table">
                 <thead><tr><th>Kategoria</th><th>Kalorie</th></tr></thead>
                 <tbody></tbody>

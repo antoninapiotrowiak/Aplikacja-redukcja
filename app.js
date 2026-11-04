@@ -12,6 +12,10 @@
         );
     };
 
+    function formatNumber(value) {
+        return new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 1 }).format(value);
+    }
+
     window.FitnessApp = {
         dateKey(date) {
             const year = date.getFullYear();
@@ -24,14 +28,54 @@
             if (!saved) return [];
 
             const meals = JSON.parse(saved);
-            return Array.isArray(meals) ? meals : [];
+            if (!Array.isArray(meals)) {
+                console.error(`Dane posiłków dla ${dateKey} nie są listą.`);
+                return [];
+            }
+
+            return meals.filter((meal) => meal && typeof meal.name === 'string');
         },
+        summarizeMeals(meals) {
+            const summary = {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                trackedProtein: 0,
+                trackedCarbs: 0,
+                trackedFat: 0,
+                incompleteMeals: 0
+            };
+
+            meals.forEach((meal) => {
+                summary.calories += Number(meal.kcal) || 0;
+                let hasAllMacros = true;
+                ['protein', 'carbs', 'fat'].forEach((nutrient) => {
+                    const value = meal[nutrient];
+                    if (value === null || value === undefined || value === '') {
+                        hasAllMacros = false;
+                        return;
+                    }
+                    const amount = Number(value);
+                    if (!Number.isFinite(amount) || amount < 0) {
+                        hasAllMacros = false;
+                        return;
+                    }
+                    summary[nutrient] += amount;
+                    summary[`tracked${nutrient[0].toUpperCase()}${nutrient.slice(1)}`] += 1;
+                });
+                if (!hasAllMacros) summary.incompleteMeals += 1;
+            });
+
+            return summary;
+        },
+        formatNumber,
         formatDate(date, options) {
             return new Intl.DateTimeFormat('pl-PL', options).format(date);
         },
         getTodayCalories() {
             const today = this.dateKey(new Date());
-            return this.getMeals(today).reduce((sum, meal) => sum + (Number(meal.kcal) || 0), 0);
+            return this.summarizeMeals(this.getMeals(today)).calories;
         }
     };
 
