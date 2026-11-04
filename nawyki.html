@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#16852f">
+    <title>14 dni nawyku — Mój Dziennik</title>
+    <link rel="stylesheet" href="app.css">
+    <script src="app.js" defer></script>
+    <script src="nawyki.js" defer></script>
+</head>
+<body class="app-page">
+    <header class="app-header">
+        <h1 class="page-title" style="margin:0">Budowanie nawyku</h1>
+        <div class="header-actions">
+            <button class="icon-button" type="button" onclick="toggleDarkMode()" aria-label="Przełącz motyw">☾</button>
+            <img class="profile-avatar" src="icon.png" alt="Awatar profilu">
+        </div>
+    </header>
+
+    <main class="page-content">
+        <section class="card habit-intro">
+            <p class="eyebrow">14-dniowy program</p>
+            <h2>Mały krok każdego dnia</h2>
+            <p class="muted">Wybierz jeden prosty nawyk i śledź regularność. Postęp jest zapisywany na tym urządzeniu.</p>
+            <form id="habitForm">
+                <label class="field-label" for="habitName">Mój nawyk</label>
+                <div class="habit-edit-row">
+                    <input class="form-control" id="habitName" maxlength="60" required>
+                    <button class="primary-button" type="submit">Zapisz</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="habit-progress-heading">
+                <div>
+                    <p class="eyebrow" style="margin:0">Twój postęp</p>
+                    <h2 id="habitProgressText" style="margin:4px 0 0">0 z 14 dni</h2>
+                </div>
+                <strong id="habitPercent">0%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-label="Postęp programu nawyku" aria-valuemin="0" aria-valuemax="14">
+                <div class="progress-fill" id="habitProgress" style="width:0%"></div>
+            </div>
+            <p class="muted" id="habitDateRange" style="margin:10px 0 0"></p>
+        </section>
+
+        <section class="card habit-calendar-card">
+            <h2>14 dni</h2>
+            <div class="habit-calendar" id="habitCalendar"></div>
+            <p id="habitMessage" class="muted habit-message" aria-live="polite"></p>
+            <button class="secondary-button" id="restartHabit" type="button">Rozpocznij program od nowa</button>
+        </section>
+
+        <section class="card habit-note">
+            <p class="eyebrow">Pamiętaj</p>
+            <p class="muted" style="margin:0">To narzędzie do śledzenia własnego celu, nie zastępuje indywidualnego wsparcia specjalisty.</p>
+        </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Główna nawigacja">
+        <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg></span>Ja</a>
+        <a href="posilki.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5"/></svg></span>Dziennik</a>
+        <a href="statystyki.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V12h4v8zm6 0V4h4v16zm6 0V8h4v12z"/></svg></span>Raporty</a>
+        <a href="trening.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="7" cy="5" r="2"/><path d="m9 8 3 2 3-1 2 2-4 2-4-2-2 4H4m8-3 2 5m2-7 3 1 1 3"/></svg></span>Ćwiczenia</a>
+    </nav>
+</body>
+</html>

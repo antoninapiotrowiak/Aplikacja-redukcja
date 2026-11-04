@@ -621,6 +621,297 @@ a {
     }
 }
 
+.diary-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: -4px 0 12px;
+}
+
+.diary-tools .secondary-button {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+.water-progress-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 14px 0 8px;
+}
+
+.water-progress-row strong {
+    color: var(--primary-dark);
+    font-size: 1.4rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.water-progress-row .muted {
+    font-size: 0.78rem;
+    text-align: right;
+}
+
+.water-progress {
+    height: 9px;
+}
+
+.water-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.water-actions .secondary-button,
+.water-undo {
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.water-undo {
+    margin-left: auto;
+    background: transparent;
+}
+
+.water-undo:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.custom-meal-list {
+    display: grid;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+.custom-meal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-top: 1px solid var(--line);
+    font-weight: 650;
+}
+
+.custom-meal-row .secondary-button {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+}
+
+.plan-intro h2,
+.habit-intro h2 {
+    margin: 0 0 8px;
+}
+
+.plan-intro > .muted,
+.habit-intro > .muted {
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+
+.plan-disclaimer {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 0.76rem;
+    line-height: 1.5;
+}
+
+.plan-day {
+    padding: 16px;
+}
+
+.plan-day-heading,
+.plan-meal-heading,
+.habit-progress-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.plan-day-heading h2 {
+    margin: 0;
+    text-transform: capitalize;
+}
+
+.plan-day-total {
+    color: var(--primary-dark);
+    font-size: 0.82rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.plan-meal {
+    padding: 12px 0 0;
+    margin-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.plan-meal-heading {
+    align-items: baseline;
+}
+
+.plan-meal-heading strong {
+    font-size: 0.84rem;
+}
+
+.plan-meal-heading span {
+    color: var(--muted);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.plan-macros {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+
+.shopping-help {
+    margin: 9px 0 12px;
+    font-size: 0.78rem;
+}
+
+.shopping-list {
+    display: grid;
+}
+
+.shopping-item {
+    display: grid;
+    min-height: 44px;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+    font-size: 0.84rem;
+}
+
+.shopping-item input,
+.habit-day input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--primary-dark);
+}
+
+.shopping-item.is-checked > span:first-of-type {
+    color: var(--muted);
+    text-decoration: line-through;
+}
+
+.shopping-quantity {
+    color: var(--muted);
+    font-size: 0.77rem;
+    white-space: nowrap;
+}
+
+.habit-edit-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+}
+
+.habit-edit-row .primary-button {
+    min-height: 46px;
+}
+
+.habit-progress-heading {
+    margin-bottom: 12px;
+}
+
+.habit-progress-heading h2 {
+    margin-bottom: 0;
+}
+
+.habit-progress-heading > strong {
+    color: var(--primary-dark);
+    font-size: 1.2rem;
+}
+
+.habit-calendar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.habit-day {
+    display: grid;
+    min-height: 84px;
+    place-content: center;
+    justify-items: center;
+    gap: 4px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.72rem;
+}
+
+.habit-day strong {
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.habit-day.is-today {
+    border-color: var(--primary);
+}
+
+.habit-day.is-completed {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+}
+
+.habit-day input:disabled {
+    opacity: 0.4;
+}
+
+.habit-message {
+    min-height: 1.2em;
+    margin: 12px 0;
+    font-size: 0.82rem;
+}
+
+.habit-calendar-card > .secondary-button {
+    width: 100%;
+}
+
+.recipe-log-action {
+    display: grid;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.recipe-log-action label {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 650;
+}
+
+.recipe-log-message {
+    min-height: 1.2em;
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
 /* A more compact, app-like skin based on the supplied mobile references. */
 :root {
     --primary: #249b3b;

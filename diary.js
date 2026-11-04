@@ -8,7 +8,7 @@
     ];
     const customCategoriesKey = 'customMealCategories';
     let selectedDate = new Date();
-    let selectedCategory = mealTypes[0].category;
+    let selectedCategory = defaultMealTypes[0].category;
     selectedDate.setHours(12, 0, 0, 0);
 
     const datePicker = document.getElementById('datePicker');
@@ -16,6 +16,28 @@
     const mealDialog = document.getElementById('mealDialog');
     const mealForm = document.getElementById('mealForm');
     const categoryDialog = document.getElementById('categoryDialog');
+
+    function readCustomCategories() {
+        const saved = localStorage.getItem(customCategoriesKey);
+        if (!saved) return [];
+        const categories = JSON.parse(saved);
+        if (!Array.isArray(categories) || categories.some((category) => typeof category !== 'string')) {
+            console.error('Zapisane własne sekcje posiłków mają nieprawidłowy format.');
+            return [];
+        }
+        return categories;
+    }
+
+    function readWaterEntries(dateKey) {
+        const saved = localStorage.getItem(`water_${dateKey}`);
+        if (!saved) return [];
+        const entries = JSON.parse(saved);
+        if (!Array.isArray(entries)) {
+            console.error(`Dane wody dla ${dateKey} nie są listą.`);
+            return [];
+        }
+        return entries.filter((entry) => entry && Number.isFinite(Number(entry.amount)) && Number(entry.amount) > 0);
+    }
 
     function shiftDate(days) {
         selectedDate.setDate(selectedDate.getDate() + days);
@@ -117,7 +139,7 @@
 
     function renderMeals(meals) {
         mealCards.replaceChildren();
-        const customCategories = JSON.parse(localStorage.getItem(customCategoriesKey) || '[]');
+        const customCategories = readCustomCategories();
         const mealTypes = [
             ...defaultMealTypes,
             ...customCategories.map((category, index) => ({
@@ -213,8 +235,15 @@
             remove.textContent = 'Usuń';
             remove.setAttribute('aria-label', `Usuń sekcję ${category}`);
             remove.addEventListener('click', () => {
-                const updated = JSON.parse(localStorage.getItem(customCategoriesKey) || '[]')
-                    .filter((name) => name !== category);
+                const hasSavedMeals = Object.keys(localStorage).some((key) => {
+                    if (!key.startsWith('meals_')) return false;
+                    return FitnessApp.getMeals(key.slice(6)).some((meal) => meal.category === category);
+                });
+                if (hasSavedMeals) {
+                    window.alert('Nie można usunąć sekcji, która zawiera zapisane posiłki.');
+                    return;
+                }
+                const updated = readCustomCategories().filter((name) => name !== category);
                 localStorage.setItem(customCategoriesKey, JSON.stringify(updated));
                 renderDiary();
             });
@@ -282,6 +311,7 @@
         datePicker.value = dayKey;
         renderWeek();
         renderMeals(meals);
+        renderWater();
     }
 
     document.getElementById('previousDay').addEventListener('click', () => shiftDate(-1));
@@ -312,7 +342,7 @@
         renderDiary();
     });
     document.getElementById('manageMeals').addEventListener('click', () => {
-        renderCustomCategoryList(JSON.parse(localStorage.getItem(customCategoriesKey) || '[]'));
+        renderCustomCategoryList(readCustomCategories());
         categoryDialog.showModal();
         document.getElementById('customMealName').focus();
     });
@@ -322,7 +352,7 @@
         const input = document.getElementById('customMealName');
         const name = input.value.trim().replace(/\s+/g, ' ');
         if (!name) return;
-        const categories = JSON.parse(localStorage.getItem(customCategoriesKey) || '[]');
+        const categories = readCustomCategories();
         const allNames = [...defaultMealTypes.map((meal) => meal.category), ...categories]
             .map((category) => category.toLocaleLowerCase('pl-PL'));
         if (allNames.includes(name.toLocaleLowerCase('pl-PL'))) {
@@ -381,7 +411,7 @@
         button.addEventListener('click', () => {
             const dayKey = FitnessApp.dateKey(selectedDate);
             const key = `water_${dayKey}`;
-            const entries = JSON.parse(localStorage.getItem(key) || '[]');
+            const entries = readWaterEntries(dayKey);
             entries.push({ amount: Number(button.dataset.waterAdd), added: Date.now() });
             localStorage.setItem(key, JSON.stringify(entries));
             renderWater();
@@ -390,7 +420,7 @@
 
     function renderWater() {
         const dayKey = FitnessApp.dateKey(selectedDate);
-        const entries = JSON.parse(localStorage.getItem(`water_${dayKey}`) || '[]');
+        const entries = readWaterEntries(dayKey);
         const total = entries.reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
         const goal = Number(localStorage.getItem('waterGoal')) || 2000;
         const percent = Math.min(100, Math.round(total / goal * 100));
@@ -418,12 +448,11 @@
     });
     document.getElementById('undoWater').addEventListener('click', () => {
         const key = `water_${FitnessApp.dateKey(selectedDate)}`;
-        const entries = JSON.parse(localStorage.getItem(key) || '[]');
+        const entries = readWaterEntries(FitnessApp.dateKey(selectedDate));
         entries.pop();
         localStorage.setItem(key, JSON.stringify(entries));
         renderWater();
     });
 
     renderDiary();
-    renderWater();
 })();

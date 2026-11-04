@@ -137,11 +137,15 @@
             margin-bottom: 10px;
             cursor: pointer;
             border: 1px solid var(--border);
-            transition: transform 0.2s;
+            width: 100%;
+            color: var(--text);
+            font: inherit;
+            text-align: left;
+            transition: box-shadow 0.2s;
         }
 
         .recipe-card:hover {
-            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(20, 30, 20, 0.12);
         }
 
         /* MODAL (OKIENKO) */
@@ -246,6 +250,12 @@
 
             <h3 style="font-size: 0.9rem; margin-top: 15px; margin-bottom: 5px;">Przygotowanie:</h3>
             <ol id="modalSteps" style="font-size: 0.85rem; padding-left: 20px; margin-top: 0; color: var(--text);"></ol>
+            <div class="recipe-log-action">
+                <label for="recipeMealCategory">Dodaj do posiłku</label>
+                <select class="form-control" id="recipeMealCategory"></select>
+                <button class="primary-button" id="addRecipeToDiary" type="button">Dodaj przepis do dziennika</button>
+                <p class="muted recipe-log-message" id="recipeLogMessage" aria-live="polite"></p>
+            </div>
         </div>
     </div>
 
@@ -310,13 +320,13 @@
 
             recipes.forEach(recipe => {
                 container.innerHTML += `
-                    <div class="recipe-card" onclick="openRecipe(${recipe.id})">
+                    <button class="recipe-card" type="button" onclick="openRecipe(${recipe.id})">
                         <div style="font-weight: 700; font-size: 0.9rem;">${recipe.title}</div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #7a8b99; margin-top: 5px;">
                             <span>⏱️ ${recipe.time}</span>
                             <span>🔥 ${recipe.calories}</span>
                         </div>
-                    </div>
+                    </button>
                 `;
             });
         }
@@ -340,8 +350,54 @@
                 stepsList.innerHTML += `<li style="margin-bottom: 6px;">${step}</li>`;
             });
 
+            const categorySelect = document.getElementById('recipeMealCategory');
+            categorySelect.replaceChildren();
+            const categories = [
+                'Śniadanie', 'Lunch', 'Obiad', 'Kolacja', 'Przekąski/Inne',
+                ...JSON.parse(localStorage.getItem('customMealCategories') || '[]')
+            ];
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.append(option);
+            });
+            document.getElementById('recipeLogMessage').textContent = '';
+            const addButton = document.getElementById('addRecipeToDiary');
+            addButton.dataset.recipeId = String(recipe.id);
+            addButton.disabled = false;
+            addButton.textContent = 'Dodaj przepis do dziennika';
             document.getElementById('recipeModal').style.display = 'flex';
         }
+
+        document.getElementById('addRecipeToDiary').addEventListener('click', function () {
+            const recipe = recipes.find(item => String(item.id) === this.dataset.recipeId);
+            if (!recipe) {
+                console.error('Nie znaleziono przepisu do zapisania w dzienniku.');
+                return;
+            }
+            const dayKey = FitnessApp.dateKey(new Date());
+            const meals = FitnessApp.getMeals(dayKey);
+            const calories = Number(String(recipe.calories).match(/\d+/)?.[0]);
+            if (!Number.isFinite(calories)) {
+                document.getElementById('recipeLogMessage').textContent = 'Nie udało się odczytać kalorii przepisu.';
+                return;
+            }
+            meals.push({
+                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                category: document.getElementById('recipeMealCategory').value,
+                name: recipe.title,
+                serving: '1 porcja',
+                kcal: calories,
+                protein: null,
+                carbs: null,
+                fat: null
+            });
+            localStorage.setItem(`meals_${dayKey}`, JSON.stringify(meals));
+            document.getElementById('recipeLogMessage').textContent = 'Zapisano w dzisiejszym dzienniku. Makroskładniki nie są dostępne dla tego przepisu.';
+            this.disabled = true;
+            this.textContent = 'Dodano do dziennika';
+        });
 
         function closeModal() {
             document.getElementById('recipeModal').style.display = 'none';
