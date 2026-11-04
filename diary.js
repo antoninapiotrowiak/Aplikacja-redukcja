@@ -1,11 +1,12 @@
 (function () {
-    const mealTypes = [
+    const defaultMealTypes = [
         { category: 'Śniadanie', icon: '☀', id: 'breakfast' },
         { category: 'Lunch', icon: '◉', id: 'lunch' },
         { category: 'Obiad', icon: '☼', id: 'dinner' },
         { category: 'Kolacja', icon: '☾', id: 'supper' },
         { category: 'Przekąski/Inne', icon: '⋯', id: 'snacks' }
     ];
+    const customCategoriesKey = 'customMealCategories';
     let selectedDate = new Date();
     let selectedCategory = mealTypes[0].category;
     selectedDate.setHours(12, 0, 0, 0);
@@ -14,6 +15,7 @@
     const mealCards = document.getElementById('mealCards');
     const mealDialog = document.getElementById('mealDialog');
     const mealForm = document.getElementById('mealForm');
+    const categoryDialog = document.getElementById('categoryDialog');
 
     function shiftDate(days) {
         selectedDate.setDate(selectedDate.getDate() + days);
@@ -115,6 +117,15 @@
 
     function renderMeals(meals) {
         mealCards.replaceChildren();
+        const customCategories = JSON.parse(localStorage.getItem(customCategoriesKey) || '[]');
+        const mealTypes = [
+            ...defaultMealTypes,
+            ...customCategories.map((category, index) => ({
+                category,
+                icon: '＋',
+                id: `custom-${index}`
+            }))
+        ];
         mealTypes.forEach((type) => {
             const categoryMeals = meals.filter((meal) => {
                 if (type.category === 'Przekąski/Inne') {
@@ -125,7 +136,7 @@
             const categorySummary = FitnessApp.summarizeMeals(categoryMeals);
 
             const card = document.createElement('section');
-            card.className = 'meal-group';
+            card.className = `meal-group${type.id.startsWith('custom-') ? ' custom-meal-group' : ''}`;
             const heading = document.createElement('div');
             heading.className = 'meal-heading';
             const toggle = document.createElement('button');
@@ -176,6 +187,39 @@
 
             card.append(heading, content);
             mealCards.append(card);
+        });
+        renderCustomCategoryList(customCategories);
+    }
+
+    function renderCustomCategoryList(categories) {
+        const list = document.getElementById('customMealList');
+        list.replaceChildren();
+        if (!categories.length) {
+            const empty = document.createElement('p');
+            empty.className = 'muted';
+            empty.textContent = 'Nie dodano jeszcze własnych sekcji.';
+            list.append(empty);
+            return;
+        }
+
+        categories.forEach((category) => {
+            const row = document.createElement('div');
+            row.className = 'custom-meal-row';
+            const label = document.createElement('span');
+            label.textContent = category;
+            const remove = document.createElement('button');
+            remove.className = 'secondary-button';
+            remove.type = 'button';
+            remove.textContent = 'Usuń';
+            remove.setAttribute('aria-label', `Usuń sekcję ${category}`);
+            remove.addEventListener('click', () => {
+                const updated = JSON.parse(localStorage.getItem(customCategoriesKey) || '[]')
+                    .filter((name) => name !== category);
+                localStorage.setItem(customCategoriesKey, JSON.stringify(updated));
+                renderDiary();
+            });
+            row.append(label, remove);
+            list.append(row);
         });
     }
 
@@ -267,6 +311,34 @@
         localStorage.setItem('userCalorieGoal', String(Math.round(updatedGoal)));
         renderDiary();
     });
+    document.getElementById('manageMeals').addEventListener('click', () => {
+        renderCustomCategoryList(JSON.parse(localStorage.getItem(customCategoriesKey) || '[]'));
+        categoryDialog.showModal();
+        document.getElementById('customMealName').focus();
+    });
+    document.getElementById('closeCategoryDialog').addEventListener('click', () => categoryDialog.close());
+    document.getElementById('categoryForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const input = document.getElementById('customMealName');
+        const name = input.value.trim().replace(/\s+/g, ' ');
+        if (!name) return;
+        const categories = JSON.parse(localStorage.getItem(customCategoriesKey) || '[]');
+        const allNames = [...defaultMealTypes.map((meal) => meal.category), ...categories]
+            .map((category) => category.toLocaleLowerCase('pl-PL'));
+        if (allNames.includes(name.toLocaleLowerCase('pl-PL'))) {
+            window.alert('Taka sekcja już istnieje.');
+            return;
+        }
+        categories.push(name);
+        localStorage.setItem(customCategoriesKey, JSON.stringify(categories));
+        input.value = '';
+        renderDiary();
+        input.focus();
+    });
+
+    document.getElementById('categoryDialog').addEventListener('click', (event) => {
+        if (event.target === categoryDialog) categoryDialog.close();
+    });
 
     mealForm.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -305,5 +377,53 @@
         if (event.target === mealDialog) closeMealDialog();
     });
 
+    document.querySelectorAll('[data-water-add]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const dayKey = FitnessApp.dateKey(selectedDate);
+            const key = `water_${dayKey}`;
+            const entries = JSON.parse(localStorage.getItem(key) || '[]');
+            entries.push({ amount: Number(button.dataset.waterAdd), added: Date.now() });
+            localStorage.setItem(key, JSON.stringify(entries));
+            renderWater();
+        });
+    });
+
+    function renderWater() {
+        const dayKey = FitnessApp.dateKey(selectedDate);
+        const entries = JSON.parse(localStorage.getItem(`water_${dayKey}`) || '[]');
+        const total = entries.reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+        const goal = Number(localStorage.getItem('waterGoal')) || 2000;
+        const percent = Math.min(100, Math.round(total / goal * 100));
+        document.getElementById('waterGoalDisplay').textContent = `${goal} ml`;
+        document.getElementById('waterAmountDisplay').textContent = `${FitnessApp.formatNumber(total)} ml`;
+        document.getElementById('waterRemainingDisplay').textContent = total >= goal
+            ? `Cel osiągnięty · ${percent}%`
+            : `Pozostało ${FitnessApp.formatNumber(goal - total)} ml`;
+        document.getElementById('waterProgress').style.width = `${percent}%`;
+        document.querySelector('.water-progress[role="progressbar"]').setAttribute('aria-valuenow', String(percent));
+        document.getElementById('undoWater').disabled = entries.length === 0;
+    }
+
+    document.getElementById('changeWaterGoal').addEventListener('click', () => {
+        const currentGoal = Number(localStorage.getItem('waterGoal')) || 2000;
+        const value = window.prompt('Podaj dzienny cel wody (ml):', String(currentGoal));
+        if (value === null) return;
+        const updatedGoal = Number(value);
+        if (!Number.isFinite(updatedGoal) || updatedGoal < 250 || updatedGoal > 10000) {
+            window.alert('Cel powinien wynosić od 250 do 10 000 ml.');
+            return;
+        }
+        localStorage.setItem('waterGoal', String(Math.round(updatedGoal)));
+        renderWater();
+    });
+    document.getElementById('undoWater').addEventListener('click', () => {
+        const key = `water_${FitnessApp.dateKey(selectedDate)}`;
+        const entries = JSON.parse(localStorage.getItem(key) || '[]');
+        entries.pop();
+        localStorage.setItem(key, JSON.stringify(entries));
+        renderWater();
+    });
+
     renderDiary();
+    renderWater();
 })();

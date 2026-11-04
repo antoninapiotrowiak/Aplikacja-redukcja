@@ -31,6 +31,10 @@
             </div>
             <button id="nextDay" type="button" aria-label="Następny dzień">›</button>
         </div>
+        <div class="diary-tools">
+            <button class="secondary-button" id="manageMeals" type="button">＋ Własny posiłek</button>
+            <a class="secondary-button" href="plany.html">Plany i zakupy</a>
+        </div>
         <input class="form-control calendar-input" id="datePicker" type="date" aria-label="Wybierz datę" hidden>
         <div class="week-strip" id="weekStrip" aria-label="Wybierz dzień tygodnia"></div>
 
@@ -59,6 +63,29 @@
         </section>
 
         <div id="mealCards"></div>
+
+        <section class="card daily-summary water-card" aria-labelledby="waterTitle">
+            <div class="daily-summary-heading">
+                <div>
+                    <p class="eyebrow" style="margin:0">Nawodnienie</p>
+                    <h2 id="waterTitle" style="margin:4px 0 0">Woda</h2>
+                </div>
+                <button class="secondary-button" id="changeWaterGoal" type="button">Cel <span id="waterGoalDisplay">2000 ml</span></button>
+            </div>
+            <div class="water-progress-row">
+                <strong id="waterAmountDisplay">0 ml</strong>
+                <span class="muted" id="waterRemainingDisplay">Pozostało 2000 ml</span>
+            </div>
+            <div class="progress-track water-progress" role="progressbar" aria-label="Dzienne spożycie wody" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-fill" id="waterProgress" style="width:0%"></div>
+            </div>
+            <div class="water-actions">
+                <button class="secondary-button" type="button" data-water-add="150">+150 ml</button>
+                <button class="secondary-button" type="button" data-water-add="250">+250 ml</button>
+                <button class="secondary-button" type="button" data-water-add="500">+500 ml</button>
+                <button class="water-undo" id="undoWater" type="button">Cofnij</button>
+            </div>
+        </section>
     </main>
 
     <dialog class="meal-dialog" id="mealDialog" aria-labelledby="mealDialogTitle">
@@ -106,6 +133,25 @@
                 <button class="secondary-button" type="button" id="cancelMeal">Anuluj</button>
                 <button class="primary-button" type="submit">Dodaj posiłek</button>
             </div>
+        </form>
+    </dialog>
+
+    <dialog class="meal-dialog category-dialog" id="categoryDialog" aria-labelledby="categoryDialogTitle">
+        <form class="meal-dialog-content" id="categoryForm">
+            <div class="dialog-heading">
+                <div>
+                    <p class="eyebrow" style="margin:0">Dostosuj dziennik</p>
+                    <h2 id="categoryDialogTitle" style="margin:4px 0 0">Własne posiłki</h2>
+                </div>
+                <button class="icon-button dialog-close" type="button" id="closeCategoryDialog" aria-label="Zamknij">×</button>
+            </div>
+            <p class="muted" style="margin:0;font-size:.86rem">Dodaj własną sekcję, np. „Drugie śniadanie”. Domyślne posiłki pozostają bez zmian.</p>
+            <div class="field">
+                <label class="field-label" for="customMealName">Nazwa sekcji</label>
+                <input class="form-control" id="customMealName" name="category" type="text" maxlength="28" placeholder="np. Drugie śniadanie" required>
+            </div>
+            <button class="primary-button" type="submit">Dodaj sekcję</button>
+            <div id="customMealList" class="custom-meal-list"></div>
         </form>
     </dialog>
 
