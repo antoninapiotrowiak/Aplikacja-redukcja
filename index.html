@@ -66,6 +66,35 @@
             <div id="weightHistory" style="margin-top:12px"></div>
         </section>
 
+        <section class="card fasting-card" aria-labelledby="fastingTitle">
+            <div class="daily-summary-heading">
+                <div>
+                    <p class="eyebrow" style="margin:0">Opcjonalny licznik</p>
+                    <h2 id="fastingTitle" style="margin:4px 0 0">Post przerywany</h2>
+                </div>
+                <span class="fasting-status" id="fastingStatus">Gotowy</span>
+            </div>
+            <p class="muted fasting-description" id="fastingDescription">Wybierz schemat i uruchom timer, kiedy zaczynasz post.</p>
+            <div class="fasting-timer" id="fastingTimer" hidden>
+                <strong id="fastingElapsed">00:00:00</strong>
+                <span class="muted" id="fastingSchedule"></span>
+                <div class="progress-track" role="progressbar" aria-label="Postęp postu" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-fill" id="fastingProgress" style="width:0%"></div>
+                </div>
+            </div>
+            <div class="fasting-controls">
+                <label class="sr-only" for="fastingProtocol">Schemat postu</label>
+                <select class="form-control" id="fastingProtocol">
+                    <option value="12">12:12 · 12 godzin</option>
+                    <option value="14">14:10 · 14 godzin</option>
+                    <option value="16" selected>16:8 · 16 godzin</option>
+                    <option value="20">20:4 · 20 godzin</option>
+                </select>
+                <button class="primary-button" id="fastingAction" type="button">Rozpocznij post</button>
+            </div>
+            <p class="fasting-disclaimer">To tylko timer, nie porada zdrowotna. Wybierz sposób żywienia odpowiedni dla siebie.</p>
+        </section>
+
         <section class="card settings-list" aria-label="Ustawienia i skróty">
             <a class="settings-link" href="index.html#weightForm">
                 <span class="settings-icon" aria-hidden="true">⚖</span>

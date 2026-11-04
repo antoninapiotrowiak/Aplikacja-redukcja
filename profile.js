@@ -5,6 +5,73 @@
     const weightInput = document.getElementById('weightInput');
     const targetInput = document.getElementById('weightTargetInput');
     const message = document.getElementById('weightMessage');
+    const fastingKey = 'fastingSession';
+    const fastingAction = document.getElementById('fastingAction');
+    const fastingProtocol = document.getElementById('fastingProtocol');
+
+    function getFastingSession() {
+        const saved = localStorage.getItem(fastingKey);
+        if (!saved) return null;
+        const session = JSON.parse(saved);
+        if (!session || !Number.isFinite(session.startedAt) ||
+            ![12, 14, 16, 20].includes(Number(session.durationHours))) {
+            console.error('Zapisany timer postu ma nieprawidłowy format.');
+            return null;
+        }
+        return session;
+    }
+
+    function renderFasting() {
+        const session = getFastingSession();
+        const timer = document.getElementById('fastingTimer');
+        const status = document.getElementById('fastingStatus');
+        const description = document.getElementById('fastingDescription');
+        timer.hidden = !session;
+        fastingProtocol.disabled = Boolean(session);
+        fastingAction.textContent = session ? 'Zakończ post' : 'Rozpocznij post';
+
+        if (!session) {
+            status.textContent = 'Gotowy';
+            status.classList.remove('is-running', 'is-complete');
+            description.textContent = 'Wybierz schemat i uruchom timer, kiedy zaczynasz post.';
+            return;
+        }
+
+        const elapsedMs = Math.max(0, Date.now() - session.startedAt);
+        const targetMs = session.durationHours * 60 * 60 * 1000;
+        const elapsedSeconds = Math.floor(elapsedMs / 1000);
+        const hours = String(Math.floor(elapsedSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(elapsedSeconds % 60).padStart(2, '0');
+        const percent = Math.min(100, Math.round(elapsedMs / targetMs * 100));
+        const endAt = new Date(session.startedAt + targetMs);
+        const endTime = FitnessApp.formatDate(endAt, { hour: '2-digit', minute: '2-digit' });
+        const complete = elapsedMs >= targetMs;
+
+        document.getElementById('fastingElapsed').textContent = `${hours}:${minutes}:${seconds}`;
+        document.getElementById('fastingSchedule').textContent = `${session.durationHours}: ${24 - session.durationHours} · cel o ${endTime}`;
+        document.getElementById('fastingProgress').style.width = `${percent}%`;
+        document.querySelector('[aria-label="Postęp postu"]').setAttribute('aria-valuenow', String(percent));
+        status.textContent = complete ? 'Cel minął' : 'W trakcie';
+        status.classList.toggle('is-running', !complete);
+        status.classList.toggle('is-complete', complete);
+        description.textContent = complete
+            ? 'Minął wybrany czas. Zakończ timer, kiedy skończysz post.'
+            : 'Timer liczy czas od rozpoczęcia. Możesz go zakończyć w dowolnym momencie.';
+    }
+
+    fastingAction.addEventListener('click', () => {
+        const session = getFastingSession();
+        if (session) {
+            localStorage.removeItem(fastingKey);
+        } else {
+            localStorage.setItem(fastingKey, JSON.stringify({
+                startedAt: Date.now(),
+                durationHours: Number(fastingProtocol.value)
+            }));
+        }
+        renderFasting();
+    });
 
     function getRecords() {
         const records = JSON.parse(localStorage.getItem(recordsKey) || '[]');
@@ -85,4 +152,6 @@
     });
 
     renderProfile();
+    renderFasting();
+    window.setInterval(renderFasting, 1000);
 })();
