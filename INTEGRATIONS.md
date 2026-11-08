@@ -12,6 +12,8 @@ Analiza AI wymaga serwera Node.js i klucza Gemini API. Klucz jest używany wył�
 
 Domyślnie serwer używa `gemini-3.8-flash`. Dostępność i darmowe limity zależą od modelu, regionu i bieżących zasad Google AI Studio. Wynik jest tylko szacunkiem. Aplikacja nie zapisuje go bez Twojego potwierdzenia. Zdjęcie i opis są wysyłane do serwera oraz Google Gemini w celu analizy. Wartości odżywcze mogą być niedokładne, szczególnie gdy nie widać wielkości porcji. Lokalny serwer nasłuchuje domyślnie tylko na `127.0.0.1`. Nie wystawiaj go do internetu bez uwierzytelniania, ograniczeń nadużyć i HTTPS. Nie umieszczaj `.env` w publicznym repozytorium.
 
+Jeśli analiza się nie powiedzie, serwer pokaże kod HTTP oraz bezpieczny opis błędu Google. Dla 401/403 sprawdź klucz i jego ograniczenia; dla 404 sprawdź, czy `GEMINI_MODEL` jest dostępny dla tego klucza; dla 429 sprawdź limity projektu. Po zmianie `.env` uruchom serwer ponownie.
+
 ## Dane Apple Health
 
 W profilu można ręcznie wczytać `export.xml` z archiwum utworzonego przez aplikację Zdrowie. Plik jest parsowany lokalnie w przeglądarce; wybrane podsumowania z ostatnich 90 dni są przechowywane w pamięci tej przeglądarki. Ponowny import zastępuje poprzedni import, a przycisk w profilu usuwa zapisane dane.

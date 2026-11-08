@@ -199,14 +199,20 @@ async function analyzeFood(body) {
 
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
-        console.error('Gemini API zwróciło błąd HTTP:', response.status, payload?.error?.status || '');
+        const providerMessage = typeof payload?.error?.message === 'string'
+            ? payload.error.message.replace(/\s+/g, ' ').slice(0, 360)
+            : '';
+        console.error('Gemini API zwróciło błąd HTTP:', response.status, payload?.error?.status || '', payload?.error?.code || '');
+        const details = providerMessage ? ` Szczegóły Google: ${providerMessage}` : '';
         const error = new Error(response.status === 401 || response.status === 403
-            ? 'Gemini odrzuciło klucz API. Sprawdź GEMINI_API_KEY oraz ograniczenia klucza w Google AI Studio.'
+            ? `Gemini odrzuciło klucz API. Sprawdź GEMINI_API_KEY i ustawienia klucza.${details}`
             : response.status === 400
-                ? 'Gemini nie przyjęło żądania. Sprawdź, czy model jest dostępny dla klucza API.'
-                : response.status === 429
-                    ? 'Osiągnięto limit Gemini API. Sprawdź limity projektu lub spróbuj później.'
-                    : 'Nie udało się uzyskać analizy z Gemini. Spróbuj ponownie później.');
+                ? `Gemini odrzuciło żądanie. Sprawdź, czy wybrany model obsługuje API i JSON.${details}`
+                : response.status === 404
+                    ? `Nie znaleziono modelu Gemini. Zmień GEMINI_MODEL w pliku .env na model dostępny w Google AI Studio.${details}`
+                    : response.status === 429
+                        ? `Osiągnięto limit Gemini API. Sprawdź limity projektu lub spróbuj później.${details}`
+                        : `Nie udało się uzyskać analizy z Gemini (HTTP ${response.status}).${details || ' Spróbuj ponownie później.'}`);
         error.status = response.status === 429 ? 429 : 502;
         throw error;
     }
@@ -214,7 +220,14 @@ async function analyzeFood(body) {
     const candidate = payload?.candidates?.[0];
     const resultText = candidate?.content?.parts?.map((part) => part.text || '').join('').trim();
     if (!resultText) {
-        const error = new Error('AI nie zwróciło wyniku. Spróbuj ponownie z czytelniejszym opisem lub zdjęciem.');
+        const finishReason = candidate?.finishReason;
+        const blockReason = payload?.promptFeedback?.blockReason;
+        const reason = blockReason
+            ? ` Żądanie zostało zablokowane przez filtr Google (${blockReason}).`
+            : finishReason && finishReason !== 'STOP'
+                ? ` Generowanie zakończyło się: ${finishReason}.`
+                : '';
+        const error = new Error(`Gemini nie zwróciło wyniku.${reason} Spróbuj ponownie z krótszym opisem lub innym zdjęciem.`);
         error.status = 502;
         throw error;
     }
