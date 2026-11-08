@@ -776,6 +776,71 @@ a {
     font-size: 0.72rem;
 }
 
+.health-import-card h2 {
+    margin: 0 0 8px;
+}
+
+.health-import-copy,
+.health-import-status {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.health-file-input {
+    min-height: 42px;
+    padding: 8px;
+    font-size: 0.76rem;
+}
+
+.health-import-status.is-error {
+    color: #b3261e;
+}
+
+.health-import-summary {
+    display: grid;
+    gap: 7px;
+    margin: 12px 0;
+}
+
+.health-import-day {
+    display: grid;
+    gap: 3px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+}
+
+.health-import-day strong {
+    font-size: 0.82rem;
+}
+
+.health-import-day span {
+    color: var(--muted);
+    font-size: 0.74rem;
+}
+
+.health-export-help {
+    margin-top: 12px;
+    color: var(--text);
+    font-size: 0.8rem;
+}
+
+.health-export-help summary {
+    color: var(--primary-dark);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.health-export-help ol {
+    display: grid;
+    gap: 6px;
+    padding-left: 20px;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
 .custom-meal-list {
     display: grid;
     gap: 8px;
@@ -2312,6 +2377,37 @@ body.dark-mode {
 .description-preview p {
     margin: 8px 0 0;
     font-weight: 700;
+}
+
+.ai-food-tool {
+    display: grid;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.ai-food-tool h3 {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.ai-food-tool > .muted {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.ai-food-file {
+    min-height: 42px;
+    padding: 8px;
+    font-size: 0.76rem;
+}
+
+.ai-food-privacy {
+    padding: 9px 10px;
+    border-radius: 9px;
+    background: var(--bg);
+    font-size: 0.71rem !important;
 }
 
 .legacy-page .user-bar {

@@ -288,6 +288,13 @@
         });
     });
 
+    window.addEventListener('storage', (event) => {
+        const todayKey = FitnessApp.dateKey(new Date());
+        if ([`meals_${todayKey}`, `water_${todayKey}`, 'userCalorieGoal', 'waterGoal'].includes(event.key)) {
+            renderProfile();
+        }
+    });
+
     renderProfile();
     renderFasting();
     window.setInterval(renderFasting, 1000);

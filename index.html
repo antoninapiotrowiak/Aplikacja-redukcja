@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="app.css">
     <script src="app.js" defer></script>
     <script src="profile.js" defer></script>
+    <script src="health-import.js" defer></script>
 </head>
 <body class="app-page">
     <header class="app-header">
@@ -62,6 +63,25 @@
                 </div>
             </section>
             <a class="primary-button" href="posilki.html" style="display:block;text-align:center;text-decoration:none">Otwórz dziennik</a>
+        </section>
+
+        <section class="card health-import-card" aria-labelledby="healthImportTitle">
+            <p class="eyebrow">Apple Health · import lokalny</p>
+            <h2 id="healthImportTitle">Dane ze Zdrowia</h2>
+            <p class="muted health-import-copy">Wybierz plik <code>export.xml</code> z archiwum wyeksportowanego w aplikacji Zdrowie. Odczyt odbywa się na tym urządzeniu — plik nie jest wysyłany na serwer. To import ręczny, nie automatyczna synchronizacja HealthKit.</p>
+            <label class="field-label" for="healthExportFile">Plik export.xml</label>
+            <input class="form-control health-file-input" id="healthExportFile" type="file" accept=".xml,text/xml,application/xml">
+            <p class="muted health-import-status" id="healthImportStatus" aria-live="polite"></p>
+            <div class="health-import-summary" id="healthImportSummary" hidden></div>
+            <button class="text-button" id="clearHealthImport" type="button" hidden>Usuń zaimportowane dane z tego urządzenia</button>
+            <details class="health-export-help">
+                <summary>Jak wyeksportować dane z iPhone’a?</summary>
+                <ol>
+                    <li>Otwórz aplikację Zdrowie i stuknij swoje zdjęcie profilowe.</li>
+                    <li>Wybierz „Eksportuj wszystkie dane zdrowotne”.</li>
+                    <li>Rozpakuj pobrane archiwum Pliki i wskaż plik <code>export.xml</code>.</li>
+                </ol>
+            </details>
         </section>
 
         <section class="card">

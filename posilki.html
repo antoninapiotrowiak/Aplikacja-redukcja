@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="app.css">
     <script src="app.js" defer></script>
     <script src="food-catalog.js" defer></script>
+    <script src="ai-food.js" defer></script>
     <script src="diary.js" defer></script>
 </head>
 <body class="app-page">
@@ -168,6 +169,19 @@
                 <button class="secondary-button" id="estimateDescription" type="button">Oblicz z bazy</button>
                 <div id="descriptionPreview" class="description-preview" hidden></div>
                 <button class="primary-button" id="addDescriptionToDiary" type="button" hidden>Uzupełnij formularz posiłku</button>
+            </section>
+            <section class="ai-food-tool" aria-labelledby="aiFoodTitle">
+                <h3 id="aiFoodTitle">Analiza AI posiłku</h3>
+                <p class="muted">Dodaj krótki opis, zdjęcie albo oba. AI oszacuje porcję i wartości odżywcze — sprawdź wynik przed zapisaniem.</p>
+                <label class="field-label" for="aiFoodDescription">Opis posiłku</label>
+                <textarea class="form-control description-input" id="aiFoodDescription" rows="2" maxlength="1200" placeholder="np. miska owsianki z mlekiem i bananem"></textarea>
+                <label class="field-label" for="aiFoodImage">Zdjęcie (JPEG, PNG lub WebP; maks. 5 MB)</label>
+                <input class="form-control ai-food-file" id="aiFoodImage" type="file" accept="image/jpeg,image/png,image/webp" capture="environment">
+                <p class="ai-food-privacy muted">Opis lub zdjęcie zostaną wysłane do skonfigurowanego serwera i dostawcy AI w celu analizy. Nie dodawaj danych osobowych. Wynik jest szacunkiem, nie poradą dietetyczną.</p>
+                <button class="secondary-button" id="analyzeFoodWithAI" type="button">Oszacuj posiłek</button>
+                <p class="food-picker-message muted" id="aiFoodMessage" aria-live="polite"></p>
+                <div id="aiFoodPreview" class="description-preview" hidden></div>
+                <button class="primary-button" id="useAIFoodEstimate" type="button" hidden>Sprawdź i uzupełnij formularz</button>
             </section>
         </div>
     </dialog>

@@ -16,5 +16,29 @@
   "start_url": "./index.html",
   "background_color": "#f5f5f7",
   "theme_color": "#16852f",
-  "display": "standalone"
+  "display": "standalone",
+  "shortcuts": [
+    {
+      "name": "Dodaj posiłek",
+      "short_name": "Dziennik",
+      "url": "./posilki.html",
+      "icons": [
+        {
+          "src": "icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Podsumowanie dnia",
+      "short_name": "Podsumowanie",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }

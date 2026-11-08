@@ -478,6 +478,53 @@
         }
     }
 
+    async function estimateFoodWithAI() {
+        const button = document.getElementById('analyzeFoodWithAI');
+        const message = document.getElementById('aiFoodMessage');
+        const preview = document.getElementById('aiFoodPreview');
+        const useButton = document.getElementById('useAIFoodEstimate');
+        const fileInput = document.getElementById('aiFoodImage');
+        const description = document.getElementById('aiFoodDescription').value;
+        const file = fileInput.files[0] || null;
+        button.disabled = true;
+        message.classList.remove('is-error');
+        message.textContent = 'Analizuję posiłek…';
+        preview.replaceChildren();
+        preview.hidden = true;
+        useButton.hidden = true;
+        try {
+            const estimate = await AIFoodAnalyzer.analyze({ description, file });
+            const title = document.createElement('strong');
+            title.textContent = estimate.name;
+            const details = document.createElement('p');
+            details.textContent = `${estimate.serving} · ${Math.round(estimate.kcal)} kcal · B ${estimate.protein ?? '—'} g · T ${estimate.fat ?? '—'} g · W ${estimate.carbs ?? '—'} g`;
+            details.style.margin = '5px 0 0';
+            const confidence = document.createElement('p');
+            const confidenceLabels = { low: 'niska pewność', medium: 'średnia pewność', high: 'wysoka pewność' };
+            confidence.textContent = `${confidenceLabels[estimate.confidence] || 'niska pewność'}${estimate.note ? ` · ${estimate.note}` : ''}`;
+            confidence.style.margin = '5px 0 0';
+            preview.append(title, details, confidence);
+            preview.hidden = false;
+            message.textContent = 'Wynik jest orientacyjny. Zweryfikuj porcję i wartości przed zapisaniem.';
+            useButton.hidden = false;
+            useButton.onclick = () => {
+                mealForm.elements.name.value = estimate.name;
+                mealForm.elements.serving.value = estimate.serving;
+                mealForm.elements.kcal.value = String(Math.round(estimate.kcal));
+                ['protein', 'fat', 'carbs'].forEach((key) => {
+                    mealForm.elements[key].value = estimate[key] === null ? '' : String(estimate[key]);
+                });
+                foodPickerDialog.close();
+                document.getElementById('mealCalories').focus();
+            };
+        } catch (error) {
+            message.textContent = error.message || 'Nie udało się przeanalizować posiłku.';
+            message.classList.add('is-error');
+        } finally {
+            button.disabled = false;
+        }
+    }
+
     function removeMeal(id) {
         const dayKey = FitnessApp.dateKey(selectedDate);
         const meals = FitnessApp.getMeals(dayKey).filter((meal) => String(meal.id) !== String(id));
@@ -604,6 +651,7 @@
     });
     document.getElementById('startBarcodeScanner').addEventListener('click', startBarcodeScanner);
     document.getElementById('estimateDescription').addEventListener('click', estimateFoodDescription);
+    document.getElementById('analyzeFoodWithAI').addEventListener('click', estimateFoodWithAI);
 
     mealForm.addEventListener('submit', (event) => {
         event.preventDefault();
